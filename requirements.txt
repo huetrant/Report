@@ -16,7 +16,8 @@ pytz==2023.3
 six==1.16.0
 cycler==0.11.0
 kiwisolver==1.4.4
-pyparsing==3.1.1
+pyparsing==3.0.9   # ✅ hạ xuống tương thích với matplotlib
 fonttools==4.42.1
 packaging==23.1
 contourpy==1.1.0
+gunicorn==21.2.0
