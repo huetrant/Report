@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Xem khách hàng{% endblock %}
+
+{% block extra_css %}
+<style>
+    .customer-card {
+        margin-bottom: 20px;
+    }
+    
+    .customer-images {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    
+    .customer-image {
+        width: 24%;
+        margin-bottom: 10px;
+    }
+    
+    .pagination {
+        justify-content: center;
+        margin-top: 20px;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #4CAF50;
+        border-color: #4CAF50;
+    }
+    
+    @media (max-width: 768px) {
+        .customer-image {
+            width: 49%;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .customer-image {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4">Danh sách khách hàng</h1>
+    
+    <div class="row">
+        {% for customer in customers_data %}
+        <div class="col-md-3 customer-card">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Khách hàng {{ customer.id }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="customer-images">
+                        {% for image in customer.images %}
+                        <div class="customer-image">
+                            <img src="data:image/png;base64,{{ image.base64 }}" class="img-fluid" alt="{{ image.name }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Phân trang -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item {% if current_page == 0 %}disabled{% endif %}">
+                <a class="page-link" href="/customer_view?page={{ current_page-1 }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            
+            {% for i in range(total_pages) %}
+            <li class="page-item {% if i == current_page %}active{% endif %}">
+                <a class="page-link" href="/customer_view?page={{ i }}">{{ i + 1 }}</a>
+            </li>
+            {% endfor %}
+            
+            <li class="page-item {% if current_page == total_pages - 1 %}disabled{% endif %}">
+                <a class="page-link" href="/customer_view?page={{ current_page+1 }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+{% endblock %}

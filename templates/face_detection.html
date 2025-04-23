@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+
+{% block title %}Nhận diện khuôn mặt{% endblock %}
+
+{% block extra_css %}
+<style>
+    .model-selector {
+        padding: 20px;
+        margin-bottom: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        border: 2px solid #007BFF;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .results-container {
+        border: 2px solid #4CAF50;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 10px 0;
+        background-color: rgba(76, 175, 80, 0.05);
+    }
+
+    .section-divider {
+        margin: 15px 0;
+        border-color: #4CAF50;
+        opacity: 0.3;
+    }
+
+    .model-title {
+        text-align: center;
+        margin-bottom: 15px;
+        color: #007BFF;
+        font-weight: bold;
+    }
+
+    .pagination {
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #4CAF50;
+        border-color: #4CAF50;
+    }
+
+    .chart-container {
+        margin-bottom: 20px;
+    }
+
+    .chart-selector {
+        margin-bottom: 15px;
+    }
+
+    .customer-card {
+        margin-bottom: 20px;
+    }
+
+    .customer-images {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .customer-image {
+        width: 24%;
+        margin-bottom: 10px;
+    }
+
+    .metrics-badge {
+        font-size: 0.8rem;
+        margin-right: 5px;
+    }
+
+    .best-worst-images {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-danger" role="alert">
+    {{ error }}
+</div>
+{% endif %}
+
+<!-- Phần lựa chọn mô hình -->
+<div class="model-selector">
+    <h2 class="model-title">Chọn mô hình nhận diện khuôn mặt</h2>
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <div class="btn-group" role="group">
+                {% for method_key, method_name in detection_methods.items() %}
+                <a href="/change_method/{{ method_key }}" class="btn btn-{% if method_key == selected_method %}primary{% else %}outline-primary{% endif %}">
+                    {{ method_name }}
+                </a>
+                {% endfor %}
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#statsModal">
+                    Thống kê
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal hiển thị thống kê -->
+    <div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="statsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="statsModalLabel">So sánh các mô hình nhận diện khuôn mặt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Mô hình</th>
+                                    <th>IoU trung bình</th>
+                                    <th>Khoảng cách tâm trung bình (px)</th>
+                                    <th>Thời gian xử lý trung bình (s)</th>
+                                    <th>Số lượng ảnh</th>
+                                    <th>Số ảnh IoU kém (<0.5)</th>
+                                    <th>Tỷ lệ ảnh IoU kém</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for method_key, method_stats in all_models_stats.items() %}
+                                <tr {% if method_key == selected_method %}class="table-active"{% endif %}>
+                                    <td><strong>{{ method_stats.name }}</strong></td>
+                                    <td>{{ method_stats.iou_mean }}</td>
+                                    <td>{{ method_stats.center_dist_mean }}</td>
+                                    <td>{{ method_stats.time_mean }}</td>
+                                    <td>{{ method_stats.count }}</td>
+                                    <td>{{ method_stats.poor_iou_count }}</td>
+                                    <td>{{ method_stats.poor_iou_percent }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Container cho kết quả nhận diện -->
+<div class="results-container">
+    <!-- Face Detection Results -->
+    <h3 class="text-center">🧑‍♂️📸 Face Detection Results</h3>
+
+    <!-- Hiển thị khách hàng -->
+    <div class="row">
+        {% for customer in customers_data %}
+        <div class="col-md-6 customer-card">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Khách hàng {{ customer.id }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="customer-images">
+                        {% for image in customer.images %}
+                        <div class="customer-image">
+                            <img src="data:image/png;base64,{{ image.base64 }}" class="img-fluid" alt="{{ image.name }}">
+                            {% if image.metrics %}
+                            <div class="mt-1">
+                                <span class="badge bg-success metrics-badge">IoU: {{ image.metrics.iou }}</span>
+                                <span class="badge bg-info metrics-badge">Dist: {{ image.metrics.center_dist }}px</span>
+                                <span class="badge bg-warning metrics-badge">Time: {{ image.metrics.inference_time }}s</span>
+                            </div>
+                            {% else %}
+                            <div class="mt-1">
+                                <span class="badge bg-danger">No prediction</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Phân trang -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item {% if current_page == 0 %}disabled{% endif %}">
+                <a class="page-link" href="/change_page/{{ current_page-1 }}?method={{ selected_method }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            {% for i in range(total_pages) %}
+            <li class="page-item {% if i == current_page %}active{% endif %}">
+                <a class="page-link" href="/change_page/{{ i }}?method={{ selected_method }}">{{ i + 1 }}</a>
+            </li>
+            {% endfor %}
+
+            <li class="page-item {% if current_page == total_pages - 1 %}disabled{% endif %}">
+                <a class="page-link" href="/change_page/{{ current_page+1 }}?method={{ selected_method }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <hr class="section-divider">
+
+    <!-- Face Detection Metrics Analysis -->
+    <h3 class="text-center">📈 Face Detection Metrics Analysis</h3>
+
+    <!-- Thống kê tổng quan -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">IoU trung bình</h5>
+                </div>
+                <div class="card-body">
+                    <h3>{{ stats.iou.mean }}</h3>
+                    <p class="mb-0">
+                        <small>Min: {{ stats.iou.min }}, Max: {{ stats.iou.max }}</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Khoảng cách tâm trung bình</h5>
+                </div>
+                <div class="card-body">
+                    <h3>{{ stats.center_dist.mean }} px</h3>
+                    <p class="mb-0">
+                        <small>Min: {{ stats.center_dist.min }} px, Max: {{ stats.center_dist.max }} px</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">Thời gian xử lý trung bình</h5>
+                </div>
+                <div class="card-body">
+                    <h3>{{ stats.time.mean }} s</h3>
+                    <p class="mb-0">
+                        <small>Min: {{ stats.time.min }} s, Max: {{ stats.time.max }} s</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ phân tích -->
+    <div class="chart-container">
+        <div class="chart-selector">
+            <ul class="nav nav-tabs" id="chartTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="iou-tab" data-bs-toggle="tab" data-bs-target="#iou" type="button" role="tab" aria-controls="iou" aria-selected="true">IoU (Giao trên hợp)</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="center-dist-tab" data-bs-toggle="tab" data-bs-target="#center-dist" type="button" role="tab" aria-controls="center-dist" aria-selected="false">Khoảng cách tâm</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="time-tab" data-bs-toggle="tab" data-bs-target="#time" type="button" role="tab" aria-controls="time" aria-selected="false">Thời gian xử lý</button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tab-content" id="chartTabsContent">
+            <div class="tab-pane fade show active" id="iou" role="tabpanel" aria-labelledby="iou-tab">
+                <img src="data:image/png;base64,{{ charts.iou }}" class="img-fluid" alt="IoU Distribution">
+            </div>
+            <div class="tab-pane fade" id="center-dist" role="tabpanel" aria-labelledby="center-dist-tab">
+                <img src="data:image/png;base64,{{ charts.center_dist }}" class="img-fluid" alt="Center Distance Distribution">
+            </div>
+            <div class="tab-pane fade" id="time" role="tabpanel" aria-labelledby="time-tab">
+                <img src="data:image/png;base64,{{ charts.time }}" class="img-fluid" alt="Inference Time Distribution">
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng thống kê chi tiết -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-success">
+                <tr>
+                    <th>Thông số</th>
+                    <th>Nhỏ nhất</th>
+                    <th>Lớn nhất</th>
+                    <th>Trung bình</th>
+                    <th>Độ lệch chuẩn</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>IoU</td>
+                    <td>{{ stats.iou.min }}</td>
+                    <td>{{ stats.iou.max }}</td>
+                    <td>{{ stats.iou.mean }}</td>
+                    <td>{{ stats.iou.std }}</td>
+                </tr>
+                <tr>
+                    <td>Khoảng cách tâm (px)</td>
+                    <td>{{ stats.center_dist.min }}</td>
+                    <td>{{ stats.center_dist.max }}</td>
+                    <td>{{ stats.center_dist.mean }}</td>
+                    <td>{{ stats.center_dist.std }}</td>
+                </tr>
+                <tr>
+                    <td>Thời gian xử lý (s)</td>
+                    <td>{{ stats.time.min }}</td>
+                    <td>{{ stats.time.max }}</td>
+                    <td>{{ stats.time.mean }}</td>
+                    <td>{{ stats.time.std }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Ảnh có IoU lớn nhất và nhỏ nhất -->
+    <h3 class="text-center">Ảnh có IoU lớn nhất và nhỏ nhất</h3>
+    <p class="text-center"><strong>Phương pháp nhận diện: {{ selected_method }}</strong></p>
+
+    <div class="row best-worst-images">
+        {% if best_worst_images and best_worst_images.best and best_worst_images.worst %}
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">IoU lớn nhất: {{ best_worst_images.best_metrics.iou }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="data:image/png;base64,{{ best_worst_images.best }}" class="img-fluid" alt="Best IoU Image">
+                        <p class="mt-2 mb-0">Tập tin: {{ best_worst_images.best_file }}</p>
+                        <ul class="list-unstyled mt-2">
+                            <li>Khoảng cách tâm: {{ best_worst_images.best_metrics.center_dist }} px</li>
+                            <li>Thời gian xử lý: {{ best_worst_images.best_metrics.inference_time }} s</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="card-title mb-0">IoU nhỏ nhất: {{ best_worst_images.worst_metrics.iou }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="data:image/png;base64,{{ best_worst_images.worst }}" class="img-fluid" alt="Worst IoU Image">
+                        <p class="mt-2 mb-0">Tập tin: {{ best_worst_images.worst_file }}</p>
+                        <ul class="list-unstyled mt-2">
+                            <li>Khoảng cách tâm: {{ best_worst_images.worst_metrics.center_dist }} px</li>
+                            <li>Thời gian xử lý: {{ best_worst_images.worst_metrics.inference_time }} s</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">IoU lớn nhất: {{ best_iou.IoU }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mt-2 mb-0">Tập tin: {{ best_iou.file_name }}</p>
+                        <ul class="list-unstyled mt-2">
+                            <li>Khoảng cách tâm: {{ best_iou.center_distance }} px</li>
+                            <li>Thời gian xử lý: {{ best_iou.inference_time }} s</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="card-title mb-0">IoU nhỏ nhất: {{ worst_iou.IoU }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mt-2 mb-0">Tập tin: {{ worst_iou.file_name }}</p>
+                        <ul class="list-unstyled mt-2">
+                            <li>Khoảng cách tâm: {{ worst_iou.center_distance }} px</li>
+                            <li>Thời gian xử lý: {{ worst_iou.inference_time }} s</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // JavaScript để xử lý các tương tác trên trang
+    document.addEventListener('DOMContentLoaded', function() {
+        // Xử lý chuyển đổi giữa các tab biểu đồ
+        var chartTabs = document.querySelectorAll('#chartTabs button');
+        chartTabs.forEach(function(tab) {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = document.querySelector(this.getAttribute('data-bs-target'));
+
+                // Ẩn tất cả các tab pane
+                document.querySelectorAll('.tab-pane').forEach(function(pane) {
+                    pane.classList.remove('show', 'active');
+                });
+
+                // Hiển thị tab pane được chọn
+                target.classList.add('show', 'active');
+
+                // Cập nhật trạng thái active của các tab
+                chartTabs.forEach(function(t) {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+
+                this.classList.add('active');
+                this.setAttribute('aria-selected', 'true');
+            });
+        });
+    });
+</script>
+{% endblock %}

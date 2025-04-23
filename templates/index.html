@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Trang chủ - Face Recognition{% endblock %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Hệ thống nhận diện khuôn mặt</h1>
+    <p class="lead">Chào mừng đến với hệ thống nhận diện khuôn mặt. Hệ thống này cho phép bạn so sánh hiệu suất của các thuật toán nhận diện khuôn mặt khác nhau.</p>
+    <hr class="my-4">
+    <p>Hệ thống hỗ trợ các thuật toán nhận diện khuôn mặt sau:</p>
+    <ul>
+        <li><strong>MTCNN</strong> - Multi-task Cascaded Convolutional Networks</li>
+        <li><strong>Yolo</strong> - You Only Look Once</li>
+        <li><strong>Haar Cascade</strong> - Phương pháp phát hiện đối tượng Viola-Jones</li>
+        <li><strong>RetinaFace</strong> - Phương pháp phát hiện khuôn mặt dựa trên RetinaNet</li>
+    </ul>
+    <p class="lead">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('face_detection') }}" role="button">Xem kết quả nhận diện</a>
+    </p>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Tính năng chính</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>So sánh hiệu suất của các thuật toán nhận diện khuôn mặt</li>
+                    <li>Phân tích các chỉ số IoU, khoảng cách tâm, thời gian xử lý</li>
+                    <li>Hiển thị kết quả nhận diện trên ảnh khách hàng</li>
+                    <li>Xem ảnh có IoU lớn nhất và nhỏ nhất</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Hướng dẫn sử dụng</h5>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li>Chọn thuật toán nhận diện khuôn mặt từ danh sách</li>
+                    <li>Xem kết quả nhận diện trên ảnh khách hàng</li>
+                    <li>Phân tích các biểu đồ thống kê</li>
+                    <li>So sánh hiệu suất giữa các thuật toán</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
