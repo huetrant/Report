@@ -158,7 +158,7 @@
 
 {% block content %}
 <div class="container report-content">
-    <h1 class="text-center report-title">Báo cáo khoa học về nhận diện khuôn mặt</h1>
+    <h1 class="text-center report-title">Báo cáo về nhận diện khuôn mặt</h1>
 
     <!-- Phần giới thiệu -->
     <section class="report-section" id="introduction">
@@ -390,53 +390,68 @@
             </div>
         </div>
 
-        <h3 class="subsection-title">Kết quả so sánh</h3>
+        <h3 class="subsection-title">Kết quả so sánh hiệu suất</h3>
         <p>
-            Dựa trên các thử nghiệm trên tập dữ liệu của chúng tôi, kết quả so sánh hiệu suất giữa các mô hình được tóm tắt như sau:
+            Dựa trên các thử nghiệm trên tập dữ liệu của chúng tôi, kết quả so sánh hiệu suất giữa các mô hình được tóm tắt trong bảng toàn diện dưới đây:
         </p>
 
         <div class="table-responsive">
             <table class="table feature-table">
                 <thead>
                     <tr>
-                        <th>Mô hình</th>
+                        <th rowspan="2">Mô hình</th>
+                        <th colspan="3">Chỉ số hiệu suất chính</th>
+                        <th colspan="2">Phân tích lỗi</th>
+                        <th colspan="2">Đánh giá tổng quan</th>
+                    </tr>
+                    <tr>
                         <th>IoU trung bình</th>
-                        <th>Khoảng cách tâm trung bình (px)</th>
-                        <th>Thời gian xử lý trung bình (ms)</th>
+                        <th>Khoảng cách tâm (px)</th>
+                        <th>Thời gian xử lý (ms)</th>
+                        <th>IoU = 0</th>
+                        <th>0 < IoU < 0.5</th>
                         <th>Ưu điểm</th>
                         <th>Nhược điểm</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>RetinaFace</td>
+                        <td><strong>RetinaFace</strong></td>
                         <td>0.89</td>
                         <td>12.5</td>
                         <td>180</td>
+                        <td>3%</td>
+                        <td>5%</td>
                         <td>Độ chính xác cao nhất, phát hiện tốt khuôn mặt nhỏ và bị che khuất</td>
                         <td>Thời gian xử lý lâu nhất, yêu cầu tài nguyên tính toán cao</td>
                     </tr>
                     <tr>
-                        <td>MTCNN</td>
+                        <td><strong>MTCNN</strong></td>
                         <td>0.82</td>
                         <td>15.3</td>
                         <td>120</td>
+                        <td>5%</td>
+                        <td>8%</td>
                         <td>Cân bằng giữa độ chính xác và tốc độ, phát hiện tốt landmark</td>
                         <td>Khó phát hiện khuôn mặt ở góc nghiêng lớn</td>
                     </tr>
                     <tr>
-                        <td>YOLO</td>
+                        <td><strong>YOLO</strong></td>
                         <td>0.85</td>
                         <td>14.2</td>
                         <td>90</td>
+                        <td>4%</td>
+                        <td>7%</td>
                         <td>Tốc độ nhanh, phát hiện tốt nhiều khuôn mặt cùng lúc</td>
                         <td>Độ chính xác thấp hơn RetinaFace, đặc biệt với khuôn mặt nhỏ</td>
                     </tr>
                     <tr>
-                        <td>Haar Cascade</td>
+                        <td><strong>Haar Cascade</strong></td>
                         <td>0.75</td>
                         <td>18.7</td>
                         <td>45</td>
+                        <td>8%</td>
+                        <td>12%</td>
                         <td>Tốc độ nhanh nhất, yêu cầu tài nguyên thấp</td>
                         <td>Độ chính xác thấp nhất, dễ bị ảnh hưởng bởi điều kiện ánh sáng</td>
                     </tr>
@@ -444,59 +459,15 @@
             </table>
         </div>
 
-        <h3 class="subsection-title">Thống kê chi tiết về chất lượng phát hiện</h3>
         <p>
-            Bảng dưới đây cung cấp thông tin chi tiết hơn về chất lượng phát hiện khuôn mặt của các mô hình, đặc biệt là phân tích về các trường hợp phát hiện không thành công hoặc có độ chính xác thấp:
+            <strong>Chú thích:</strong>
+            <ul>
+                <li><strong>IoU trung bình:</strong> Độ chính xác trung bình của bounding box dự đoán so với ground truth.</li>
+                <li><strong>Khoảng cách tâm:</strong> Khoảng cách Euclidean trung bình giữa tâm của bounding box dự đoán và ground truth.</li>
+                <li><strong>IoU = 0:</strong> Tỷ lệ ảnh mà mô hình không phát hiện được khuôn mặt.</li>
+                <li><strong>0 < IoU < 0.5:</strong> Tỷ lệ ảnh mà mô hình phát hiện khuôn mặt nhưng với độ chính xác thấp.</li>
+            </ul>
         </p>
-
-        <div class="table-responsive">
-            <table class="table feature-table">
-                <thead>
-                    <tr>
-                        <th>Mô hình</th>
-                        <th>IoU trung bình</th>
-                        <th>Khoảng cách tâm trung bình (px)</th>
-                        <th>Thời gian xử lý trung bình (ms)</th>
-                        <th>IoU = 0 (không phát hiện)</th>
-                        <th>0 < IoU < 0.5 (phát hiện kém)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>RetinaFace</td>
-                        <td>0.89</td>
-                        <td>12.5</td>
-                        <td>180</td>
-                        <td>3%</td>
-                        <td>5%</td>
-                    </tr>
-                    <tr>
-                        <td>MTCNN</td>
-                        <td>0.82</td>
-                        <td>15.3</td>
-                        <td>120</td>
-                        <td>5%</td>
-                        <td>8%</td>
-                    </tr>
-                    <tr>
-                        <td>YOLO</td>
-                        <td>0.85</td>
-                        <td>14.2</td>
-                        <td>90</td>
-                        <td>4%</td>
-                        <td>7%</td>
-                    </tr>
-                    <tr>
-                        <td>Haar Cascade</td>
-                        <td>0.75</td>
-                        <td>18.7</td>
-                        <td>45</td>
-                        <td>8%</td>
-                        <td>12%</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
 
         <h3 class="subsection-title">Phân tích kết quả</h3>
         <p>
