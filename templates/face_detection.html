@@ -85,6 +85,13 @@
 </div>
 {% endif %}
 
+<!-- Thêm loading spinner -->
+<div id="loading" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
 <!-- Phần lựa chọn mô hình -->
 <div class="model-selector">
     <h2 class="model-title">Chọn mô hình nhận diện khuôn mặt</h2>
@@ -93,9 +100,13 @@
         <div class="col-md-12 text-center">
             <div class="btn-group" role="group">
                 {% for method_key, method_name in detection_methods.items() %}
-                <a href="/change_method/{{ method_key }}" class="btn btn-{% if method_key == selected_method %}primary{% else %}outline-primary{% endif %}">
+                <button
+                    class="btn btn-{% if method_key == selected_method %}primary{% else %}outline-primary{% endif %} method-btn"
+                    data-method="{{ method_key }}"
+                    onclick="changeMethod('{{ method_key }}')"
+                >
                     {{ method_name }}
-                </a>
+                </button>
                 {% endfor %}
                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#statsModal">
                     Thống kê
@@ -430,3 +441,166 @@
     });
 </script>
 {% endblock %}
+
+{% block scripts %}
+<script>
+async function changeMethod(method) {
+    // Hiển thị loading spinner
+    document.getElementById('loading').style.display = 'block';
+
+    try {
+        const response = await fetch(`/api/change_method/${method}`);
+        const data = await response.json();
+
+        if (response.ok) {
+            // Cập nhật UI với dữ liệu mới
+            updateStats(data.stats);
+            updateModelsStats(data.all_models_stats);
+            updateCharts(data.charts);
+            updateCustomersData(data.customers_data);
+            updatePagination(data.current_page, data.total_pages);
+            updateBestWorstImages(data.best_worst_images, data.best_iou, data.worst_iou);
+
+            // Cập nhật trạng thái nút
+            updateMethodButtons(method);
+
+            // Cập nhật URL mà không reload trang
+            window.history.pushState({}, '', `/face_detection?method=${method}`);
+        } else {
+            alert('Lỗi khi tải dữ liệu: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Đã xảy ra lỗi khi tải dữ liệu');
+    } finally {
+        // Ẩn loading spinner
+        document.getElementById('loading').style.display = 'none';
+    }
+}
+
+// Các hàm helper để cập nhật UI
+function updateStats(stats) {
+    // Cập nhật các thống kê
+    document.getElementById('iou-stats').innerHTML = `...`; // Cập nhật HTML
+}
+
+function updateModelsStats(allModelsStats) {
+    // Cập nhật bảng so sánh các mô hình
+    const tbody = document.querySelector('#statsModal table tbody');
+    tbody.innerHTML = ''; // Clear current content
+
+    for (const [key, stats] of Object.entries(allModelsStats)) {
+        tbody.innerHTML += `
+            <tr ${key === selectedMethod ? 'class="table-active"' : ''}>
+                <td><strong>${stats.name}</strong></td>
+                <td>${stats.iou_mean}</td>
+                <td>${stats.center_dist_mean}</td>
+                <td>${stats.time_mean}</td>
+                <td>${stats.count}</td>
+                <td>${stats.poor_iou_count}</td>
+                <td>${stats.poor_iou_percent}</td>
+            </tr>
+        `;
+    }
+}
+
+function updateCharts(charts) {
+    // Cập nhật các biểu đồ
+    document.getElementById('iou-chart').src = `data:image/png;base64,${charts.iou}`;
+    document.getElementById('center-dist-chart').src = `data:image/png;base64,${charts.center_dist}`;
+    document.getElementById('time-chart').src = `data:image/png;base64,${charts.time}`;
+}
+
+function updateCustomersData(customersData) {
+    // Cập nhật phần hiển thị dữ liệu khách hàng
+    const customersContainer = document.getElementById('customers-container');
+    // Cập nhật HTML cho phần customers
+}
+
+function updateMethodButtons(selectedMethod) {
+    // Cập nhật trạng thái active của các nút
+    document.querySelectorAll('.method-btn').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-primary');
+        if (btn.dataset.method === selectedMethod) {
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-primary');
+        }
+    });
+}
+
+function updateBestWorstImages(bestWorstImages, bestIou, worstIou) {
+    // Cập nhật phần hiển thị ảnh có IoU lớn nhất và nhỏ nhất
+    const bestWorstContainer = document.querySelector('.best-worst-images');
+
+    if (bestWorstImages && bestWorstImages.best && bestWorstImages.worst) {
+        // Nếu có dữ liệu ảnh, hiển thị ảnh
+        bestWorstContainer.innerHTML = `
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">IoU lớn nhất: ${bestWorstImages.best_metrics.iou}</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="data:image/png;base64,${bestWorstImages.best}" class="img-fluid" alt="Best IoU Image">
+                        <p class="mt-2 mb-0">Tập tin: ${bestWorstImages.best_file}</p>
+                        <ul class="list-unstyled mt-2">
+                            <li>Khoảng cách tâm: ${bestWorstImages.best_metrics.center_dist} px</li>
+                            <li>Thời gian xử lý: ${bestWorstImages.best_metrics.inference_time} s</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="card-title mb-0">IoU nhỏ nhất: ${bestWorstImages.worst_metrics.iou}</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="data:image/png;base64,${bestWorstImages.worst}" class="img-fluid" alt="Worst IoU Image">
+                        <p class="mt-2 mb-0">Tập tin: ${bestWorstImages.worst_file}</p>
+                        <ul class="list-unstyled mt-2">
+                            <li>Khoảng cách tâm: ${bestWorstImages.worst_metrics.center_dist} px</li>
+                            <li>Thời gian xử lý: ${bestWorstImages.worst_metrics.inference_time} s</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (bestIou && worstIou) {
+        // Nếu không có ảnh nhưng có dữ liệu metrics, hiển thị metrics
+        bestWorstContainer.innerHTML = `
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">IoU lớn nhất: ${bestIou.IoU}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mt-2 mb-0">Tập tin: ${bestIou.file_name}</p>
+                        <ul class="list-unstyled mt-2">
+                            <li>Khoảng cách tâm: ${bestIou.center_distance} px</li>
+                            <li>Thời gian xử lý: ${bestIou.inference_time} s</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="card-title mb-0">IoU nhỏ nhất: ${worstIou.IoU}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mt-2 mb-0">Tập tin: ${worstIou.file_name}</p>
+                        <ul class="list-unstyled mt-2">
+                            <li>Khoảng cách tâm: ${worstIou.center_distance} px</li>
+                            <li>Thời gian xử lý: ${worstIou.inference_time} s</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+</script>
+{% endblock %}
+

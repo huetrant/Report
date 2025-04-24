@@ -11,46 +11,87 @@ def create_charts(predictions_df):
     """Tạo các biểu đồ phân tích."""
     charts = {}
 
+    # Tăng chiều cao của biểu đồ và thêm padding
+    plt.rcParams['figure.autolayout'] = True
+
     # Biểu đồ IoU
-    fig1 = Figure(figsize=(10, 3))
+    fig1 = Figure(figsize=(10, 4))  # Tăng chiều cao từ 3 lên 4
     ax1 = fig1.add_subplot(1, 1, 1)
-    sns.histplot(data=predictions_df['IoU'], bins=20, kde=True, ax=ax1, color='green')
+    
+    # Vẽ histogram
+    hist = sns.histplot(data=predictions_df['IoU'], bins=20, kde=True, ax=ax1, color='green')
+    
+    # Thêm giá trị trên mỗi cột
+    for i in hist.patches:
+        hist.annotate(f'{int(i.get_height())}',
+                     xy=(i.get_x() + i.get_width()/2, i.get_height()),
+                     xytext=(0, 3),  # 3 points vertical offset
+                     textcoords="offset points",
+                     ha='center', va='bottom')
+
     ax1.set_xlabel('IoU (Giao trên hợp)')
     ax1.set_ylabel('Tần suất')
     ax1.set_title('Phân phối giá trị IoU')
     ax1.grid(True, alpha=0.3)
+    
+    # Thêm padding để tránh bị cắt
+    fig1.tight_layout(pad=1.5)
 
-    # Chuyển biểu đồ thành base64 để hiển thị trong HTML
+    # Chuyển biểu đồ thành base64
     buf = io.BytesIO()
-    fig1.savefig(buf, format='png')
+    fig1.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
     charts['iou'] = base64.b64encode(buf.getvalue()).decode('utf-8')
 
     # Biểu đồ khoảng cách tâm
-    fig2 = Figure(figsize=(10, 3))
+    fig2 = Figure(figsize=(10, 4))
     ax2 = fig2.add_subplot(1, 1, 1)
-    sns.histplot(data=predictions_df['center_distance'], bins=20, kde=True, ax=ax2, color='red')
+    
+    hist = sns.histplot(data=predictions_df['center_distance'], bins=20, kde=True, ax=ax2, color='red')
+    
+    # Thêm giá trị trên mỗi cột
+    for i in hist.patches:
+        hist.annotate(f'{int(i.get_height())}',
+                     xy=(i.get_x() + i.get_width()/2, i.get_height()),
+                     xytext=(0, 3),
+                     textcoords="offset points",
+                     ha='center', va='bottom')
+
     ax2.set_xlabel('Khoảng cách tâm (pixels)')
     ax2.set_ylabel('Tần suất')
     ax2.set_title('Phân phối khoảng cách tâm')
     ax2.grid(True, alpha=0.3)
+    
+    fig2.tight_layout(pad=1.5)
 
     buf = io.BytesIO()
-    fig2.savefig(buf, format='png')
+    fig2.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
     charts['center_dist'] = base64.b64encode(buf.getvalue()).decode('utf-8')
 
     # Biểu đồ thời gian xử lý
-    fig3 = Figure(figsize=(10, 3))
+    fig3 = Figure(figsize=(10, 4))
     ax3 = fig3.add_subplot(1, 1, 1)
-    sns.histplot(data=predictions_df['inference_time'], bins=20, kde=True, ax=ax3, color='blue')
+    
+    hist = sns.histplot(data=predictions_df['inference_time'], bins=20, kde=True, ax=ax3, color='blue')
+    
+    # Thêm giá trị trên mỗi cột
+    for i in hist.patches:
+        hist.annotate(f'{int(i.get_height())}',
+                     xy=(i.get_x() + i.get_width()/2, i.get_height()),
+                     xytext=(0, 3),
+                     textcoords="offset points",
+                     ha='center', va='bottom')
+
     ax3.set_xlabel('Thời gian xử lý (giây)')
     ax3.set_ylabel('Tần suất')
     ax3.set_title('Phân phối thời gian xử lý')
     ax3.grid(True, alpha=0.3)
+    
+    fig3.tight_layout(pad=1.5)
 
     buf = io.BytesIO()
-    fig3.savefig(buf, format='png')
+    fig3.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
     charts['time'] = base64.b64encode(buf.getvalue()).decode('utf-8')
 
@@ -169,3 +210,4 @@ def create_best_worst_images(best_iou_row, worst_iou_row):
 
 # Thêm import os ở đầu file
 import os
+

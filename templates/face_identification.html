@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Nhận diện khuôn mặt{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center page-title">Đánh giá các mô hình nhận diện khuôn mặt</h2>
+
+    <div class="error-container" {% if not error %}style="display: none;"{% endif %}>
+        {% if error %}
+        <div class="alert alert-warning">
+            <h4 class="alert-heading">Có lỗi xảy ra!</h4>
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Mô tả</h5>
+                    <p>Đánh giá hiệu suất của mô hình RetinaFace kết hợp với các mô hình nhúng đặc trưng trong việc nhận diện khuôn mặt:</p>
+                    <ul>
+                        <li><strong>Tập Same:</strong> Các cặp ảnh của cùng một người, dùng để đánh giá khả năng nhận diện đúng.</li>
+                        <li><strong>Tập Different:</strong> Các cặp ảnh của những người khác nhau, dùng để đánh giá khả năng phân biệt.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h3 class="text-center mb-3">Cặp ảnh cùng người (Same)</h3>
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Similarity: 0.6891</span>
+                        <span>Processing Time: 1.0058s</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <img src="{{ url_for('static', filename='images/same.png') }}" class="img-fluid" alt="Same Pair">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h3 class="text-center mb-3">Cặp ảnh khác người (Different)</h3>
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Similarity: -0.0514</span>
+                        <span>Processing Time: 1.0069s</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <img src="{{ url_for('static', filename='images/different.png') }}" class="img-fluid" alt="Different Pair">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê và biểu đồ -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Thống kê hiệu suất nhận diện</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="card-title mb-0">Chọn mô hình nhúng đặc trưng</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input model-select" type="radio" name="model" id="model-arcface" value="ArcFace" {% if selected_model == 'ArcFace' %}checked{% endif %}>
+                                            <label class="form-check-label" for="model-arcface">ArcFace</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input model-select" type="radio" name="model" id="model-facenet" value="FaceNet" {% if selected_model == 'FaceNet' %}checked{% endif %}>
+                                            <label class="form-check-label" for="model-facenet">FaceNet</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input model-select" type="radio" name="model" id="model-efficientnet" value="EfficientNet" {% if selected_model == 'EfficientNet' %}checked{% endif %}>
+                                            <label class="form-check-label" for="model-efficientnet">EfficientNet</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="card-title mb-0">Độ chính xác</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Accuracy
+                                            <span class="badge bg-primary rounded-pill accuracy-value">{{ "%.4f"|format(metrics.accuracy|float) if metrics.accuracy is not none else 'N/A' }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            F1 Score
+                                            <span class="badge bg-primary rounded-pill f1-value">{{ "%.4f"|format(metrics.f1_score|float) if metrics.f1_score is not none else 'N/A' }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Threshold tối ưu
+                                            <span class="badge bg-primary rounded-pill threshold-value">{{ "%.4f"|format(metrics.optimal_threshold|float) if metrics.optimal_threshold is not none else 'N/A' }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="card-title mb-0">Tỷ lệ lỗi</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            FAR (False Accept Rate)
+                                            <span class="badge bg-warning text-dark rounded-pill far-value">{{ "%.4f"|format(metrics.far|float) if metrics.far is not none else 'N/A' }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            FRR (False Reject Rate)
+                                            <span class="badge bg-warning text-dark rounded-pill frr-value">{{ "%.4f"|format(metrics.frr|float) if metrics.frr is not none else 'N/A' }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            ERR (Equal Error Rate)
+                                            <span class="badge bg-warning text-dark rounded-pill err-value">{{ "%.4f"|format(metrics.err|float) if metrics.err is not none else 'N/A' }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="card-title mb-0">Đường cong ROC</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            AUC (Area Under Curve)
+                                            <span class="badge bg-success rounded-pill auc-value">{{ "%.4f"|format(metrics.auc|float) if metrics.auc is not none else 'N/A' }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Biểu đồ -->
+                    <div class="row mt-4">
+                        <div class="col-12 mb-4">
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" class="btn btn-primary active" id="btn-accuracy-f1">Accuracy & F1</button>
+                                <button type="button" class="btn btn-primary" id="btn-far-frr">FAR & FRR & ERR</button>
+                                <button type="button" class="btn btn-primary" id="btn-roc">ROC Curve</button>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="chart-container" style="position: relative; height:400px;">
+                                <div id="accuracy-f1-chart" class="chart-item active">
+                                    {% if charts.accuracy_f1 %}
+                                        {% if '<div' in charts.accuracy_f1 %}
+                                            {{ charts.accuracy_f1|safe }}
+                                        {% else %}
+                                            <img src="data:image/png;base64,{{ charts.accuracy_f1 }}" class="img-fluid" alt="Accuracy & F1 Chart">
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="alert alert-warning">Không có dữ liệu biểu đồ</div>
+                                    {% endif %}
+                                </div>
+                                <div id="far-frr-chart" class="chart-item">
+                                    {% if charts.far_frr %}
+                                        {% if '<div' in charts.far_frr %}
+                                            {{ charts.far_frr|safe }}
+                                        {% else %}
+                                            <img src="data:image/png;base64,{{ charts.far_frr }}" class="img-fluid" alt="FAR & FRR Chart">
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="alert alert-warning">Không có dữ liệu biểu đồ</div>
+                                    {% endif %}
+                                </div>
+                                <div id="roc-chart" class="chart-item">
+                                    {% if charts.roc %}
+                                        {% if '<div' in charts.roc %}
+                                            {{ charts.roc|safe }}
+                                        {% else %}
+                                            <img src="data:image/png;base64,{{ charts.roc }}" class="img-fluid" alt="ROC Curve">
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="alert alert-warning">Không có dữ liệu biểu đồ</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    padding: 0.5rem 1rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+img {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 2px;
+}
+
+.chart-item {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+.chart-item.active {
+    display: block;
+}
+
+.chart-container {
+    min-height: 500px;
+}
+
+/* Make Plotly charts responsive */
+.js-plotly-plot {
+    width: 100%;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lấy các nút và chart containers
+        const btnAccuracyF1 = document.getElementById('btn-accuracy-f1');
+        const btnFarFrr = document.getElementById('btn-far-frr');
+        const btnRoc = document.getElementById('btn-roc');
+
+        const accuracyF1Chart = document.getElementById('accuracy-f1-chart');
+        const farFrrChart = document.getElementById('far-frr-chart');
+        const rocChart = document.getElementById('roc-chart');
+
+        // Thêm event listeners cho các nút
+        btnAccuracyF1.addEventListener('click', function() {
+            // Hiển thị biểu đồ Accuracy & F1
+            accuracyF1Chart.classList.add('active');
+            farFrrChart.classList.remove('active');
+            rocChart.classList.remove('active');
+
+            // Cập nhật trạng thái active của các nút
+            btnAccuracyF1.classList.add('active');
+            btnFarFrr.classList.remove('active');
+            btnRoc.classList.remove('active');
+        });
+
+        btnFarFrr.addEventListener('click', function() {
+            // Hiển thị biểu đồ FAR & FRR
+            accuracyF1Chart.classList.remove('active');
+            farFrrChart.classList.add('active');
+            rocChart.classList.remove('active');
+
+            // Cập nhật trạng thái active của các nút
+            btnAccuracyF1.classList.remove('active');
+            btnFarFrr.classList.add('active');
+            btnRoc.classList.remove('active');
+        });
+
+        btnRoc.addEventListener('click', function() {
+            // Hiển thị biểu đồ ROC
+            accuracyF1Chart.classList.remove('active');
+            farFrrChart.classList.remove('active');
+            rocChart.classList.add('active');
+
+            // Cập nhật trạng thái active của các nút
+            btnAccuracyF1.classList.remove('active');
+            btnFarFrr.classList.remove('active');
+            btnRoc.classList.add('active');
+        });
+
+        // Xử lý sự kiện thay đổi mô hình
+        const modelRadios = document.querySelectorAll('.model-select');
+        modelRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.checked) {
+                    // Chuyển hướng đến trang với mô hình đã chọn
+                    window.location.href = '/face_identification?model=' + this.value;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

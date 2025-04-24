@@ -42,58 +42,72 @@ def load_predictions(detection_method):
 
 def calculate_stats(predictions_df):
     """Tính toán các thống kê từ dữ liệu dự đoán."""
-    return {
-        'iou': {
-            'mean': f"{predictions_df['IoU'].mean():.4f}",
-            'min': f"{predictions_df['IoU'].min():.4f}",
-            'max': f"{predictions_df['IoU'].max():.4f}",
-            'std': f"{predictions_df['IoU'].std():.4f}"
-        },
-        'center_dist': {
-            'mean': f"{predictions_df['center_distance'].mean():.2f}",
-            'min': f"{predictions_df['center_distance'].min():.2f}",
-            'max': f"{predictions_df['center_distance'].max():.2f}",
-            'std': f"{predictions_df['center_distance'].std():.2f}"
-        },
-        'time': {
-            'mean': f"{predictions_df['inference_time'].mean():.4f}",
-            'min': f"{predictions_df['inference_time'].min():.4f}",
-            'max': f"{predictions_df['inference_time'].max():.4f}",
-            'std': f"{predictions_df['inference_time'].std():.4f}"
+    try:
+        if predictions_df.empty:
+            return {
+                'iou': {'mean': '0.0000', 'min': '0.0000', 'max': '0.0000', 'std': '0.0000'},
+                'center_dist': {'mean': '0.00', 'min': '0.00', 'max': '0.00', 'std': '0.00'},
+                'time': {'mean': '0.0000', 'min': '0.0000', 'max': '0.0000', 'std': '0.0000'}
+            }
+
+        # Đảm bảo các cột tồn tại
+        required_columns = ['IoU', 'center_distance', 'inference_time']
+        for col in required_columns:
+            if col not in predictions_df.columns:
+                raise ValueError(f"Missing required column: {col}")
+
+        return {
+            'iou': {
+                'mean': f"{predictions_df['IoU'].mean():.4f}",
+                'min': f"{predictions_df['IoU'].min():.4f}",
+                'max': f"{predictions_df['IoU'].max():.4f}",
+                'std': f"{predictions_df['IoU'].std():.4f}"
+            },
+            'center_dist': {
+                'mean': f"{predictions_df['center_distance'].mean():.2f}",
+                'min': f"{predictions_df['center_distance'].min():.2f}",
+                'max': f"{predictions_df['center_distance'].max():.2f}",
+                'std': f"{predictions_df['center_distance'].std():.2f}"
+            },
+            'time': {
+                'mean': f"{predictions_df['inference_time'].mean():.4f}",
+                'min': f"{predictions_df['inference_time'].min():.4f}",
+                'max': f"{predictions_df['inference_time'].max():.4f}",
+                'std': f"{predictions_df['inference_time'].std():.4f}"
+            }
         }
-    }
+    except Exception as e:
+        print(f"Error calculating stats: {e}")
+        # Trả về giá trị mặc định nếu có lỗi
+        return {
+            'iou': {'mean': 'N/A', 'min': 'N/A', 'max': 'N/A', 'std': 'N/A'},
+            'center_dist': {'mean': 'N/A', 'min': 'N/A', 'max': 'N/A', 'std': 'N/A'},
+            'time': {'mean': 'N/A', 'min': 'N/A', 'max': 'N/A', 'std': 'N/A'}
+        }
 
 def calculate_all_models_stats():
-    """Tính toán thống kê cho tất cả các mô hình để so sánh."""
-    # Lấy danh sách các phương pháp nhận diện
+    """Tính toán thống kê cho tất cả các mô hình."""
+    all_stats = {}
     detection_methods = get_detection_methods()
     csv_files = get_csv_files()
-
-    # Khởi tạo dictionary để lưu kết quả
-    all_stats = {}
-
-    # Đọc dữ liệu từ mỗi file CSV và tính toán thống kê
+    
     for method_key, method_name in detection_methods.items():
         try:
-            # Đọc dữ liệu từ file CSV
             predictions_df = pd.read_csv(csv_files[method_key])
-
-            # Đảm bảo tên cột phù hợp
-            if 'filename' in predictions_df.columns and 'file_name' not in predictions_df.columns:
-                predictions_df = predictions_df.rename(columns={'filename': 'file_name'})
-
+            
             # Tính toán thống kê
-            # Đếm số lượng ảnh có IoU kém (dưới 0.5)
-            poor_iou_count = len(predictions_df[predictions_df['IoU'] < 0.5])
+            zero_iou_count = len(predictions_df[predictions_df['IoU'] == 0])
+            poor_iou_count = len(predictions_df[(predictions_df['IoU'] > 0) & (predictions_df['IoU'] < 0.5)])
 
             all_stats[method_key] = {
                 'name': method_name,
                 'iou_mean': f"{predictions_df['IoU'].mean():.4f}",
                 'center_dist_mean': f"{predictions_df['center_distance'].mean():.2f}",
                 'time_mean': f"{predictions_df['inference_time'].mean():.4f}",
-                'count': len(predictions_df),
+                'zero_iou_count': zero_iou_count,
                 'poor_iou_count': poor_iou_count,
-                'poor_iou_percent': f"{poor_iou_count / len(predictions_df) * 100:.1f}%" if len(predictions_df) > 0 else "0.0%"
+                'zero_iou_percent': f"{zero_iou_count / len(predictions_df) * 100:.1f}%",
+                'poor_iou_percent': f"{poor_iou_count / len(predictions_df) * 100:.1f}%"
             }
         except Exception as e:
             print(f"Không thể đọc file {csv_files[method_key]}: {e}")
@@ -102,8 +116,9 @@ def calculate_all_models_stats():
                 'iou_mean': 'N/A',
                 'center_dist_mean': 'N/A',
                 'time_mean': 'N/A',
-                'count': 0,
+                'zero_iou_count': 0,
                 'poor_iou_count': 0,
+                'zero_iou_percent': '0.0%',
                 'poor_iou_percent': '0.0%'
             }
 
@@ -258,3 +273,9 @@ def create_customer_view_data(page, customers_per_page=8):
         customers_data.append(customer_data)
 
     return customers_data, total_pages
+
+
+
+
+
+

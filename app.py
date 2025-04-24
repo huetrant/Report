@@ -13,6 +13,7 @@ from utils.face_recognition.data_processing import (
 )
 from utils.face_recognition.visualization import create_charts, create_best_worst_images
 from utils.face_recognition.face_detection import load_annotations
+from utils.face_recognition.performance_metrics import calculate_metrics_and_plots
 
 app = Flask(__name__)
 
@@ -203,12 +204,12 @@ def face_detection():
                           stats=stats,
                           all_models_stats=all_models_stats,
                           charts=charts,
-                          best_iou=best_iou_row,
-                          worst_iou=worst_iou_row,
-                          best_worst_images=best_worst_images,
                           customers_data=customers_data,
                           current_page=page,
-                          total_pages=total_pages)
+                          total_pages=total_pages,
+                          best_worst_images=best_worst_images,
+                          best_iou=best_iou_row,
+                          worst_iou=worst_iou_row)
 
 
 @app.route('/customer_view')
@@ -235,6 +236,125 @@ def change_page(page):
     """Đổi trang và chuyển hướng về trang face_detection."""
     method = request.args.get('method', 'MTCNN')
     return redirect(url_for('face_detection', method=method, page=page))
+
+@app.route('/api/change_method/<string:method>')
+def api_change_method(method):
+    """API endpoint để lấy dữ liệu cho phương pháp nhận diện."""
+    predictions_df, error = load_predictions(method)
+    if error:
+        return jsonify({
+            'error': error
+        }), 400
+
+    stats = calculate_stats(predictions_df)
+    all_models_stats = calculate_all_models_stats()
+    charts = create_charts(predictions_df)
+
+    # Tạo dữ liệu khách hàng cho trang hiện tại
+    page = request.args.get('page', 0, type=int)
+    customers_per_page = 4
+    current_customers, total_pages = get_customer_folders(page, customers_per_page)
+    customers_data = create_customers_data(current_customers, predictions_df)
+
+    # Tìm ảnh có IoU lớn nhất và nhỏ nhất
+    best_iou_idx = predictions_df['IoU'].idxmax()
+    worst_iou_idx = predictions_df['IoU'].idxmin()
+
+    # Tạo bản sao của DataFrame để tránh thay đổi dữ liệu gốc
+    best_row_df = predictions_df.loc[[best_iou_idx]].copy()
+    worst_row_df = predictions_df.loc[[worst_iou_idx]].copy()
+
+    # Đổi tên cột nếu cần
+    if 'x1' not in best_row_df.columns and 'xmin' in best_row_df.columns:
+        best_row_df = best_row_df.rename(columns={'xmin': 'x1', 'ymin': 'y1', 'xmax': 'x2', 'ymax': 'y2'})
+        worst_row_df = worst_row_df.rename(columns={'xmin': 'x1', 'ymin': 'y1', 'xmax': 'x2', 'ymax': 'y2'})
+
+    # Chuyển đổi thành dictionary
+    best_iou_row = best_row_df.iloc[0].to_dict()
+    worst_iou_row = worst_row_df.iloc[0].to_dict()
+
+    # Tạo ảnh có IoU lớn nhất và nhỏ nhất
+    best_worst_images = create_best_worst_images(predictions_df)
+
+    return jsonify({
+        'stats': stats,
+        'all_models_stats': all_models_stats,
+        'charts': charts,
+        'customers_data': customers_data,
+        'current_page': page,
+        'total_pages': total_pages,
+        'best_iou': best_iou_row,
+        'worst_iou': worst_iou_row,
+        'best_worst_images': best_worst_images
+    })
+
+@app.route('/report')
+def report():
+    """Chuyển hướng từ trang báo cáo tổng quan đến trang chủ."""
+    return redirect(url_for('index'))
+
+@app.route('/face_identification')
+def face_identification():
+    """Trang nhận diện khuôn mặt."""
+    # Lấy tham số model từ query string, mặc định là ArcFace
+    model = request.args.get('model', 'ArcFace')
+
+    # Đảm bảo model là một trong các giá trị hợp lệ
+    valid_models = ['ArcFace', 'FaceNet', 'EfficientNet']
+    if model not in valid_models:
+        model = 'ArcFace'
+
+    # Tính toán metrics và charts
+    error_message, charts, metrics = get_model_metrics(model)
+
+    # Render the template with metrics data
+    return render_template('face_identification.html',
+                          charts=charts,
+                          metrics=metrics,
+                          selected_model=model,
+                          error=error_message)
+
+
+def get_model_metrics(model):
+    """Hàm helper để tính toán metrics và charts cho model."""
+    error_message = None
+    charts = {}
+    metrics = {}
+
+    app.logger.debug(f"Selected model: {model}")
+
+    # Try to calculate metrics
+    try:
+        # Tính toán các metrics và tạo biểu đồ với model được chọn
+        same_path = f"result/Regnition/RetinaFace_{model}_same.csv"
+        diff_path = f"result/Regnition/RetinaFace_{model}_different.csv"
+
+        # Check if files exist
+        if os.path.exists(same_path) and os.path.exists(diff_path):
+            charts, metrics = calculate_metrics_and_plots(same_path, diff_path)
+        else:
+            app.logger.warning(f"CSV files not found: {same_path} or {diff_path}")
+            error_message = f"Không tìm thấy file CSV để tính toán metrics cho mô hình {model}."
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        app.logger.error(f"Error calculating metrics: {str(e)}")
+        error_message = f"Lỗi khi tính toán metrics: {str(e)}"
+
+    # Đảm bảo charts và metrics luôn là dict
+    if charts is None:
+        charts = {}
+
+    if metrics is None:
+        metrics = {}
+
+    return error_message, charts, metrics
+
+# Redirect old face_recognition URL to new report URL for backward compatibility
+@app.route('/face_recognition')
+def face_recognition():
+    """Redirect to report page."""
+    return redirect(url_for('report'))
 
 if __name__ == '__main__':
     # Khởi tạo logging

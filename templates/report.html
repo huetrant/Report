@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Báo cáo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center page-title">Báo cáo tổng quan</h2>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Giới thiệu</h5>
+                    <p>Hệ thống nhận diện khuôn mặt được phát triển nhằm mục đích đánh giá và so sánh hiệu suất của các mô hình khác nhau trong lĩnh vực phát hiện và nhận diện khuôn mặt.</p>
+                    <p>Báo cáo này cung cấp tổng quan về các mô hình được sử dụng và kết quả đánh giá của chúng.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Mô hình phát hiện khuôn mặt</h5>
+                </div>
+                <div class="card-body">
+                    <p>Hệ thống sử dụng 4 mô hình phát hiện khuôn mặt khác nhau:</p>
+                    <ul>
+                        <li><strong>MTCNN:</strong> Multi-task Cascaded Convolutional Networks</li>
+                        <li><strong>Haar Cascade:</strong> Phương pháp truyền thống sử dụng Haar features</li>
+                        <li><strong>RetinaFace:</strong> Mô hình hiện đại với độ chính xác cao</li>
+                        <li><strong>YOLO:</strong> You Only Look Once, mô hình phát hiện đối tượng nhanh</li>
+                    </ul>
+                    <p>Các mô hình được đánh giá dựa trên các chỉ số như IoU, khoảng cách tâm và thời gian xử lý.</p>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('face_detection') }}" class="btn btn-primary">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Mô hình nhận diện khuôn mặt</h5>
+                </div>
+                <div class="card-body">
+                    <p>Hệ thống sử dụng 3 mô hình nhúng đặc trưng khác nhau:</p>
+                    <ul>
+                        <li><strong>ArcFace:</strong> Mô hình với hàm mất mát Additive Angular Margin</li>
+                        <li><strong>FaceNet:</strong> Mô hình nhúng khuôn mặt của Google</li>
+                        <li><strong>EfficientNet:</strong> Mô hình hiệu quả với kiến trúc tối ưu</li>
+                    </ul>
+                    <p>Các mô hình được đánh giá dựa trên các chỉ số như Accuracy, F1 Score, FAR, FRR và AUC.</p>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('face_identification') }}" class="btn btn-success">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Tổng quan kết quả</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Phát hiện khuôn mặt</h6>
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mô hình</th>
+                                        <th>IoU trung bình</th>
+                                        <th>Thời gian xử lý (ms)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>MTCNN</td>
+                                        <td>0.82</td>
+                                        <td>120</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Haar Cascade</td>
+                                        <td>0.75</td>
+                                        <td>45</td>
+                                    </tr>
+                                    <tr>
+                                        <td>RetinaFace</td>
+                                        <td>0.89</td>
+                                        <td>180</td>
+                                    </tr>
+                                    <tr>
+                                        <td>YOLO</td>
+                                        <td>0.85</td>
+                                        <td>90</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Nhận diện khuôn mặt</h6>
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mô hình</th>
+                                        <th>Accuracy</th>
+                                        <th>F1 Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>ArcFace</td>
+                                        <td>0.95</td>
+                                        <td>0.94</td>
+                                    </tr>
+                                    <tr>
+                                        <td>FaceNet</td>
+                                        <td>0.92</td>
+                                        <td>0.91</td>
+                                    </tr>
+                                    <tr>
+                                        <td>EfficientNet</td>
+                                        <td>0.90</td>
+                                        <td>0.89</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

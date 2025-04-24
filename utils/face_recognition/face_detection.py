@@ -66,7 +66,7 @@ def draw_box(draw, box, color):
     draw.rectangle(
         [(box[0], box[1]), (box[2], box[3])],
         outline=color,
-        width=2
+        width=5
     )
 
 def calculate_iou(box1, box2):
