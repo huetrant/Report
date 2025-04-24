@@ -158,34 +158,45 @@
 
 {% block content %}
 <div class="container report-content">
-    <h1 class="text-center report-title">Báo cáo về nhận diện khuôn mặt</h1>
+    <h1 class="text-center report-title">Báo cáo khoa học về nhận diện khách hàng trong hệ thống chatbot bán hàng</h1>
 
     <!-- Phần giới thiệu -->
     <section class="report-section" id="introduction">
         <h2 class="section-title">Giới thiệu</h2>
         <p>
-            Nhận diện khuôn mặt là một lĩnh vực nghiên cứu quan trọng trong thị giác máy tính và trí tuệ nhân tạo, với nhiều ứng dụng thực tế trong các hệ thống an ninh, xác thực sinh trắc học, và tương tác người-máy. Quá trình nhận diện khuôn mặt thường bao gồm hai giai đoạn chính: phát hiện khuôn mặt (face detection) và nhận dạng khuôn mặt (face recognition).
+            Trong thời đại số hóa hiện nay, các hệ thống chatbot bán hàng đang ngày càng phổ biến, giúp doanh nghiệp tự động hóa quy trình bán hàng và hỗ trợ khách hàng. Tuy nhiên, một trong những thách thức lớn nhất của các hệ thống này là khả năng nhận diện và cá nhân hóa trải nghiệm cho từng khách hàng. Công nghệ nhận diện khuôn mặt đóng vai trò quan trọng trong việc giải quyết thách thức này, cho phép hệ thống chatbot nhận diện khách hàng quen thuộc và cung cấp trải nghiệm mua sắm được cá nhân hóa.
         </p>
         <p>
-            <strong>Phát hiện khuôn mặt</strong> là bước đầu tiên và quan trọng, nhằm xác định vị trí và kích thước của khuôn mặt trong ảnh hoặc video. Độ chính xác của bước này ảnh hưởng trực tiếp đến hiệu suất của toàn bộ hệ thống nhận diện khuôn mặt. Các thuật toán phát hiện khuôn mặt hiện đại như MTCNN, Haar Cascade, RetinaFace và YOLO đã đạt được những tiến bộ đáng kể về độ chính xác và tốc độ xử lý.
+            <strong>Nhận diện khách hàng</strong> trong hệ thống chatbot bán hàng thường bao gồm hai giai đoạn chính: phát hiện khuôn mặt (face detection) và nhận dạng khuôn mặt (face recognition). Quá trình này cho phép hệ thống xác định danh tính của khách hàng, truy xuất lịch sử mua hàng và sở thích cá nhân, từ đó cung cấp dịch vụ tư vấn và đề xuất sản phẩm phù hợp.
         </p>
         <p>
-            <strong>Nhận dạng khuôn mặt</strong> là bước tiếp theo, nhằm xác định danh tính của khuôn mặt đã được phát hiện. Các phương pháp nhận dạng khuôn mặt hiện đại thường sử dụng các mô hình học sâu để trích xuất các đặc trưng khuôn mặt và so sánh chúng với cơ sở dữ liệu đã biết.
+            <strong>Phát hiện khuôn mặt</strong> là bước đầu tiên và quan trọng, nhằm xác định vị trí và kích thước của khuôn mặt trong ảnh hoặc video từ webcam của khách hàng. Độ chính xác của bước này ảnh hưởng trực tiếp đến hiệu suất của toàn bộ hệ thống nhận diện. Các thuật toán phát hiện khuôn mặt hiện đại như RetinaFace, MTCNN, YOLO và Haar Cascade đã đạt được những tiến bộ đáng kể về độ chính xác và tốc độ xử lý, phù hợp cho các ứng dụng thương mại điện tử.
         </p>
         <p>
-            Trong báo cáo này, chúng tôi tập trung vào phân tích chi tiết về RetinaFace - một trong những mô hình phát hiện khuôn mặt tiên tiến nhất hiện nay, cùng với việc đánh giá so sánh hiệu suất của nó với các mô hình khác như MTCNN, Haar Cascade và YOLO.
+            <strong>Nhận dạng khuôn mặt</strong> là bước tiếp theo, nhằm xác định danh tính của khách hàng dựa trên khuôn mặt đã được phát hiện. Các phương pháp nhận dạng khuôn mặt hiện đại như ArcFace sử dụng các mô hình học sâu để trích xuất các đặc trưng khuôn mặt và so sánh chúng với cơ sở dữ liệu khách hàng đã đăng ký.
+        </p>
+        <p>
+            Trong báo cáo này, chúng tôi trình bày một hệ thống toàn diện về nhận diện khách hàng trong chatbot bán hàng, tập trung vào việc tích hợp các công nghệ nhận diện khuôn mặt tiên tiến (RetinaFace và ArcFace) với hệ thống chatbot thông minh để nâng cao trải nghiệm mua sắm trực tuyến và tăng hiệu quả bán hàng.
         </p>
     </section>
 
-    <!-- Phần phát hiện khuôn mặt - RetinaFace -->
-    <section class="report-section" id="retinaface">
-        <h2 class="section-title">Phát hiện khuôn mặt với RetinaFace</h2>
+    <!-- Phần phát hiện khuôn mặt trong hệ thống chatbot bán hàng -->
+    <section class="report-section" id="face-detection-ecommerce">
+        <h2 class="section-title">Phát hiện khuôn mặt khách hàng trong hệ thống chatbot bán hàng</h2>
 
-        <h3 class="subsection-title">1. Kiến trúc chi tiết của RetinaFace</h3>
-
-        <h4 class="subsection-title">1.1 Backbone và Feature Pyramid</h4>
         <p>
-            RetinaFace sử dụng mạng ResNet (C1 → C5) hoặc MobileNet làm backbone, kết hợp với kiến trúc Feature Pyramid Network (FPN) gồm các tầng từ P2 đến P6, để tạo ra bản đồ đặc trưng (feature maps) ở nhiều độ phân giải khác nhau:
+            Trong hệ thống chatbot bán hàng, việc phát hiện chính xác khuôn mặt khách hàng là bước đầu tiên và quan trọng trong quá trình nhận diện khách hàng. Khi khách hàng tương tác với chatbot thông qua webcam, hệ thống cần nhanh chóng và chính xác xác định vị trí khuôn mặt trong khung hình, ngay cả trong điều kiện ánh sáng không lý tưởng hoặc góc nhìn khác nhau.
+        </p>
+
+        <p>
+            Chúng tôi đã lựa chọn RetinaFace làm nền tảng cho hệ thống phát hiện khuôn mặt trong chatbot bán hàng của mình vì hiệu suất vượt trội của nó trong các điều kiện thực tế. Dưới đây là chi tiết về kiến trúc và cách triển khai RetinaFace trong hệ thống của chúng tôi.
+        </p>
+
+        <h3 class="subsection-title">1. Kiến trúc RetinaFace cho ứng dụng thương mại điện tử</h3>
+
+        <h4 class="subsection-title">1.1 Backbone và Feature Pyramid tối ưu cho webcam</h4>
+        <p>
+            Để đảm bảo hiệu suất thời gian thực trên các thiết bị của khách hàng, chúng tôi đã tối ưu hóa RetinaFace bằng cách sử dụng MobileNet làm backbone thay vì ResNet nặng hơn. Kiến trúc Feature Pyramid Network (FPN) được giữ nguyên để đảm bảo khả năng phát hiện khuôn mặt ở nhiều kích thước khác nhau - điều cần thiết khi khách hàng di chuyển gần hoặc xa webcam:
         </p>
 
         <div class="table-responsive">
@@ -194,75 +205,64 @@
                     <tr>
                         <th>Feature Map</th>
                         <th>Kích thước đầu ra (cho ảnh 640×640)</th>
-                        <th>Stride</th>
-                        <th>Anchor Sizes (px)</th>
+                        <th>Ứng dụng trong thương mại điện tử</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>P2</td>
-                        <td>160×160×256</td>
-                        <td>4</td>
-                        <td>16, 20.16, 25.4</td>
+                        <td>P2 (160×160×256)</td>
+                        <td>Stride: 4, Anchors: 16-25px</td>
+                        <td>Phát hiện khuôn mặt khi khách hàng ở xa webcam</td>
                     </tr>
                     <tr>
-                        <td>P3</td>
-                        <td>80×80×256</td>
-                        <td>8</td>
-                        <td>32, 40.32, 50.8</td>
+                        <td>P3 (80×80×256)</td>
+                        <td>Stride: 8, Anchors: 32-50px</td>
+                        <td>Phát hiện khuôn mặt ở khoảng cách trung bình</td>
                     </tr>
                     <tr>
-                        <td>P4</td>
-                        <td>40×40×256</td>
-                        <td>16</td>
-                        <td>64, 80.63, 101.59</td>
+                        <td>P4 (40×40×256)</td>
+                        <td>Stride: 16, Anchors: 64-101px</td>
+                        <td>Phát hiện khuôn mặt ở khoảng cách gần</td>
                     </tr>
                     <tr>
-                        <td>P5</td>
-                        <td>20×20×256</td>
-                        <td>32</td>
-                        <td>128, 161.26, 203.19</td>
-                    </tr>
-                    <tr>
-                        <td>P6</td>
-                        <td>10×10×256</td>
-                        <td>64</td>
-                        <td>256, 322.54, 406.37</td>
+                        <td>P5-P6</td>
+                        <td>Stride: 32-64, Anchors: 128-406px</td>
+                        <td>Phát hiện khi khách hàng rất gần webcam (hiếm gặp)</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <div class="feature-item">
-            <h5>Đặc điểm nổi bật:</h5>
+            <h5>Tối ưu hóa cho ứng dụng thương mại điện tử:</h5>
             <ul>
-                <li>Các tầng P2-P6 được xây dựng theo kiểu top-down & lateral connection từ ResNet như FPN truyền thống.</li>
-                <li>75% anchors được đặt trên P2 để xử lý khuôn mặt cực nhỏ.</li>
-                <li>Sử dụng deformable convolutions trong context module để học được biến dạng hình học linh hoạt hơn.</li>
+                <li>Tập trung 75% anchors trên P2-P3 để xử lý khoảng cách phổ biến khi khách hàng sử dụng máy tính.</li>
+                <li>Giảm độ phức tạp tính toán bằng cách sử dụng MobileNet để đảm bảo trải nghiệm mượt mà trên thiết bị của khách hàng.</li>
+                <li>Tối ưu hóa thời gian xử lý để giảm độ trễ trong tương tác với chatbot.</li>
             </ul>
         </div>
 
-        <h4 class="subsection-title">1.2 Multi-task Prediction Heads</h4>
+        <h4 class="subsection-title">1.2 Các nhánh dự đoán đa nhiệm vụ cho nhận diện khách hàng</h4>
         <p>
-            Tại mỗi điểm ảnh trong feature map (tức mỗi anchor), mô hình thực hiện 4 nhánh dự đoán song song:
+            Mô hình RetinaFace trong hệ thống chatbot bán hàng của chúng tôi thực hiện 4 nhánh dự đoán song song, mỗi nhánh đóng vai trò quan trọng trong việc nhận diện chính xác khách hàng:
         </p>
 
         <div class="row">
             <div class="col-md-6">
                 <div class="feature-item">
-                    <h5>1. Face Classification Head:</h5>
+                    <h5>1. Phân loại khuôn mặt:</h5>
                     <ul>
-                        <li>Phân loại anchor là khuôn mặt hay không (face / non-face).</li>
-                        <li>Sử dụng loss phân loại nhị phân (softmax loss).</li>
+                        <li>Xác định có phải khuôn mặt hay không - loại bỏ các vùng không phải khuôn mặt.</li>
+                        <li>Đảm bảo chatbot chỉ tương tác khi phát hiện được khuôn mặt khách hàng.</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="feature-item">
-                    <h5>2. Bounding Box Regression Head:</h5>
+                    <h5>2. Xác định vùng khuôn mặt:</h5>
                     <ul>
-                        <li>Dự đoán tọa độ bounding box: (tx, ty, tw, th)</li>
-                        <li>Sử dụng loss: Smooth-L1 giống Fast R-CNN.</li>
+                        <li>Dự đoán chính xác vị trí và kích thước khuôn mặt (tx, ty, tw, th).</li>
+                        <li>Cắt chính xác vùng khuôn mặt để chuyển sang bước nhận dạng.</li>
                     </ul>
                 </div>
             </div>
@@ -271,90 +271,80 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="feature-item">
-                    <h5>3. Facial Landmark Regression Head:</h5>
+                    <h5>3. Xác định điểm mốc khuôn mặt:</h5>
                     <ul>
-                        <li>Dự đoán 5 điểm landmark: 2 mắt, mũi, 2 khóe miệng.</li>
-                        <li>Output: {lx1, ly1, ..., lx5, ly5}.</li>
-                        <li>Cũng dùng loss Smooth-L1 và anchor-based normalization.</li>
+                        <li>Dự đoán 5 điểm mốc: 2 mắt, mũi, 2 khóe miệng.</li>
+                        <li>Cho phép căn chỉnh khuôn mặt trước khi nhận dạng, cải thiện độ chính xác.</li>
+                        <li>Hỗ trợ phát hiện góc nghiêng của khuôn mặt khách hàng.</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="feature-item">
-                    <h5>4. Dense 3D Mesh Regression Head:</h5>
+                    <h5>4. Phân tích hình học 3D (tùy chọn):</h5>
                     <ul>
-                        <li>Dự đoán thông tin hình học 3D của khuôn mặt bằng Mesh Decoder:</li>
-                        <li>Dùng graph convolution để suy ra tọa độ các đỉnh lưới (mesh vertices) và texture.</li>
-                        <li>Dùng differentiable renderer để chiếu lên mặt phẳng ảnh 2D.</li>
-                        <li>Tổn thất L1 pixel-wise giữa khuôn mặt render từ 3D và ảnh thật.</li>
+                        <li>Dự đoán thông tin 3D của khuôn mặt để cải thiện khả năng nhận diện trong điều kiện ánh sáng kém.</li>
+                        <li>Hỗ trợ phát hiện khuôn mặt thật (anti-spoofing) - ngăn chặn giả mạo bằng ảnh.</li>
+                        <li>Có thể tắt trên thiết bị yếu để tối ưu hiệu suất.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
         <div class="report-note">
-            <p class="mb-0">Tất cả các nhánh sử dụng cùng 1 feature extractor chia sẻ → hiệu quả tính toán cao.</p>
+            <p class="mb-0">Tất cả các nhánh sử dụng cùng một feature extractor chia sẻ, giúp tối ưu hóa hiệu suất tính toán - yếu tố quan trọng để đảm bảo trải nghiệm mượt mà cho khách hàng khi tương tác với chatbot bán hàng.</p>
         </div>
 
-        <h3 class="subsection-title">2. Nguyên lý hoạt động (Forward & Loss)</h3>
+        <h3 class="subsection-title">2. Quy trình xử lý trong thời gian thực</h3>
 
-        <h4 class="subsection-title">2.1 Forward Pass</h4>
+        <p>
+            Khi khách hàng tương tác với chatbot bán hàng thông qua webcam, hệ thống thực hiện quy trình phát hiện khuôn mặt theo các bước sau:
+        </p>
+
         <ol>
-            <li>Ảnh đầu vào (ví dụ 640×640) → qua backbone (ResNet/MobileNet) → tạo ra các tầng C2-C5.</li>
-            <li>Qua FPN → tạo ra các tầng P2-P6 (feature pyramid).</li>
-            <li>Tại mỗi tầng Pn:
-                <ul>
-                    <li>Gán anchor với ground-truth box nếu IoU > 0.5</li>
-                    <li>Bỏ qua nếu IoU < 0.3</li>
-                </ul>
-            </li>
-            <li>Với mỗi anchor dương:
-                <ul>
-                    <li>Dự đoán: class + box + 5 landmark + mesh 3D</li>
-                    <li>Tính các thành phần tổn thất.</li>
-                </ul>
-            </li>
+            <li><strong>Tiền xử lý hình ảnh:</strong> Chuẩn hóa kích thước (640×640px), điều chỉnh độ sáng và độ tương phản để thích ứng với điều kiện ánh sáng khác nhau.</li>
+            <li><strong>Trích xuất đặc trưng:</strong> Hình ảnh đi qua MobileNet và FPN để tạo ra các feature map đa tỷ lệ.</li>
+            <li><strong>Phát hiện và lọc:</strong> Áp dụng ngưỡng tin cậy (confidence threshold) 0.8 để loại bỏ các phát hiện không chắc chắn, đảm bảo độ chính xác.</li>
+            <li><strong>Xử lý chồng chéo:</strong> Áp dụng Non-Maximum Suppression với ngưỡng IoU 0.4 để loại bỏ các box chồng chéo.</li>
+            <li><strong>Căn chỉnh khuôn mặt:</strong> Sử dụng 5 điểm mốc để căn chỉnh khuôn mặt về vị trí chuẩn trước khi chuyển sang bước nhận dạng.</li>
         </ol>
 
-        <h4 class="subsection-title">2.2 Multi-task Loss Tổng quát</h4>
-        <div class="report-formula">
-            $$\mathcal{L} = \mathcal{L}_{cls} + \lambda_1 \cdot \mathcal{L}_{box} + \lambda_2 \cdot \mathcal{L}_{landmark} + \lambda_3 \cdot \mathcal{L}_{dense}$$
+        <h4 class="subsection-title">2.1 Tối ưu hóa hiệu suất cho ứng dụng thương mại điện tử</h4>
+
+        <p>
+            Để đảm bảo trải nghiệm mượt mà cho khách hàng khi tương tác với chatbot bán hàng, chúng tôi đã thực hiện các tối ưu hóa sau:
+        </p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <h5>Tối ưu hóa tốc độ:</h5>
+                    <ul>
+                        <li>Giảm tần suất phát hiện xuống 10 khung hình/giây - đủ cho tương tác nhưng giảm tải CPU/GPU.</li>
+                        <li>Sử dụng phiên bản MobileNet nhẹ hơn cho thiết bị có cấu hình thấp.</li>
+                        <li>Tắt nhánh Dense 3D Mesh Regression trên thiết bị yếu.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <h5>Tối ưu hóa độ chính xác:</h5>
+                    <ul>
+                        <li>Áp dụng kỹ thuật tăng cường dữ liệu (data augmentation) để cải thiện khả năng thích ứng với điều kiện ánh sáng khác nhau.</li>
+                        <li>Sử dụng bộ nhớ đệm để theo dõi vị trí khuôn mặt qua các khung hình, giảm thiểu hiện tượng nhấp nháy.</li>
+                        <li>Tích hợp cơ chế phát hiện chất lượng khuôn mặt để thông báo cho khách hàng khi điều kiện không lý tưởng.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
-        <p>Trong đó:</p>
-        <ul>
-            <li>$\mathcal{L}_{cls}$: Cross-entropy giữa nhãn thật và nhãn dự đoán</li>
-            <li>$\mathcal{L}_{box}$: Smooth-L1 giữa box dự đoán và ground-truth</li>
-            <li>$\mathcal{L}_{landmark}$: Smooth-L1 giữa landmark dự đoán và ground-truth</li>
-            <li>$\mathcal{L}_{pixel}$ (dense):</li>
-        </ul>
-
         <div class="report-formula">
-            $$\mathcal{L}_{pixel} = \frac{1}{W \times H} \sum_{i,j} ||R(3D \text{ mesh})_{ij} - I_{ij}||_1$$
+            $$\mathcal{L}_{total} = \mathcal{L}_{cls} + \lambda_1 \cdot \mathcal{L}_{box} + \lambda_2 \cdot \mathcal{L}_{landmark} + \lambda_3 \cdot \mathcal{L}_{dense}$$
         </div>
 
-        <h3 class="subsection-title">3. Mesh Decoder (Dense Regression Branch)</h3>
-
-        <p>Các bước xử lý:</p>
-        <ol>
-            <li>Trích xuất thông tin đặc trưng $x \in \mathbb{R}^n$ từ feature map (1×1×256).</li>
-            <li>Dùng graph convolution:</li>
-        </ol>
-
-        <div class="report-formula">
-            $$y = g_{\theta}(L)x = \sum_{k=0}^{K-1} \theta_k T_k(\tilde{L})x$$
-        </div>
-
-        <p>Với:</p>
-        <ul>
-            <li>$L$ là Laplacian matrix của graph</li>
-            <li>$T_k$ là đa thức Chebyshev</li>
-        </ul>
-
-        <ol start="3">
-            <li>Dự đoán các thông số hình dạng + texture.</li>
-            <li>Dựng lại mesh 3D bằng decoder và render ra 2D → so sánh với ảnh thật.</li>
-        </ol>
+        <p>
+            Trong đó các hệ số $\lambda$ được điều chỉnh để ưu tiên độ chính xác của box và landmark - hai yếu tố quan trọng nhất cho việc nhận diện khách hàng trong hệ thống chatbot bán hàng.
+        </p>
     </section>
 
     <!-- Phần đánh giá giữa các mô hình -->
