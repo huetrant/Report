@@ -290,8 +290,13 @@ def api_change_method(method):
 
 @app.route('/report')
 def report():
-    """Chuyển hướng từ trang báo cáo tổng quan đến trang chủ."""
-    return redirect(url_for('index'))
+    """Chuyển hướng từ trang báo cáo tổng quan đến trang báo cáo khoa học."""
+    return redirect(url_for('bao_cao'))
+
+@app.route('/bao_cao')
+def bao_cao():
+    """Trang báo cáo khoa học về nhận diện khuôn mặt."""
+    return render_template('bao_cao.html')
 
 @app.route('/face_identification')
 def face_identification():

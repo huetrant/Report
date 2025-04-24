@@ -33,6 +33,11 @@
                             <i class="bi bi-person-badge"></i> Nhận diện khuôn mặt
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('bao_cao') %}active{% endif %}" href="{{ url_for('bao_cao') }}">
+                            <i class="bi bi-journal-text"></i> Báo cáo
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

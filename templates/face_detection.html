@@ -132,9 +132,10 @@
                                     <th>IoU trung bình</th>
                                     <th>Khoảng cách tâm trung bình (px)</th>
                                     <th>Thời gian xử lý trung bình (s)</th>
-                                    <th>Số lượng ảnh</th>
-                                    <th>Số ảnh IoU kém (<0.5)</th>
-                                    <th>Tỷ lệ ảnh IoU kém</th>
+                                    <th>IoU = 0 (số lượng)</th>
+                                    <th>IoU = 0 (tỷ lệ)</th>
+                                    <th>0 < IoU < 0.5 (số lượng)</th>
+                                    <th>0 < IoU < 0.5 (tỷ lệ)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -144,9 +145,10 @@
                                     <td>{{ method_stats.iou_mean }}</td>
                                     <td>{{ method_stats.center_dist_mean }}</td>
                                     <td>{{ method_stats.time_mean }}</td>
-                                    <td>{{ method_stats.count }}</td>
-                                    <td>{{ method_stats.poor_iou_count }}</td>
-                                    <td>{{ method_stats.poor_iou_percent }}</td>
+                                    <td>{{ method_stats.zero_iou_count|default(0) }}</td>
+                                    <td>{{ method_stats.zero_iou_percent|default('0.0%') }}</td>
+                                    <td>{{ method_stats.poor_iou_count|default(0) }}</td>
+                                    <td>{{ method_stats.poor_iou_percent|default('0.0%') }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -496,9 +498,10 @@ function updateModelsStats(allModelsStats) {
                 <td>${stats.iou_mean}</td>
                 <td>${stats.center_dist_mean}</td>
                 <td>${stats.time_mean}</td>
-                <td>${stats.count}</td>
-                <td>${stats.poor_iou_count}</td>
-                <td>${stats.poor_iou_percent}</td>
+                <td>${stats.zero_iou_count || 0}</td>
+                <td>${stats.zero_iou_percent || '0.0%'}</td>
+                <td>${stats.poor_iou_count || 0}</td>
+                <td>${stats.poor_iou_percent || '0.0%'}</td>
             </tr>
         `;
     }

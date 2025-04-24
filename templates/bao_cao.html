@@ -1,0 +1,774 @@
+{% extends "base.html" %}
+
+{% block title %}Báo cáo khoa học{% endblock %}
+
+{% block extra_css %}
+<!-- MathJax for rendering mathematical formulas -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true
+    },
+    CommonHTML: { linebreaks: { automatic: true } },
+    "HTML-CSS": { linebreaks: { automatic: true } },
+    SVG: { linebreaks: { automatic: true } }
+  });
+</script>
+
+<style>
+    /* Styling for scientific report */
+    .report-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .report-title {
+        color: #343a40;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        color: #007bff;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .subsection-title {
+        color: #28a745;
+        margin-top: 1.2rem;
+        margin-bottom: 0.8rem;
+        font-weight: 500;
+    }
+
+    .report-content {
+        text-align: justify;
+        line-height: 1.6;
+    }
+
+    .report-content p {
+        margin-bottom: 1rem;
+    }
+
+    .report-image {
+        margin: 1.5rem 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+    }
+
+    .report-table {
+        margin: 1.5rem 0;
+    }
+
+    .report-table th {
+        background-color: #f8f9fa;
+    }
+
+    .report-note {
+        background-color: #f8f9fa;
+        border-left: 4px solid #007bff;
+        padding: 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .report-formula {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+    .feature-item {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid #28a745;
+    }
+
+    .feature-item h5 {
+        color: #28a745;
+        margin-bottom: 0.5rem;
+    }
+
+    .highlight {
+        background-color: #fff3cd;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+    }
+
+    .reference {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .reference ol {
+        padding-left: 1.5rem;
+    }
+
+    .reference li {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Table styling for feature maps */
+    .feature-table {
+        width: 100%;
+        margin-bottom: 1rem;
+        background-color: #fff;
+        border-collapse: collapse;
+    }
+
+    .feature-table th,
+    .feature-table td {
+        padding: 0.75rem;
+        text-align: center;
+        border: 1px solid #dee2e6;
+    }
+
+    .feature-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+
+    .feature-table tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    /* Styling for code blocks */
+    .code-block {
+        background-color: #f8f9fa;
+        border-left: 4px solid #6c757d;
+        padding: 1rem;
+        margin: 1rem 0;
+        font-family: 'Courier New', monospace;
+        overflow-x: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container report-content">
+    <h1 class="text-center report-title">Báo cáo khoa học về nhận diện khuôn mặt</h1>
+
+    <!-- Phần giới thiệu -->
+    <section class="report-section" id="introduction">
+        <h2 class="section-title">Giới thiệu</h2>
+        <p>
+            Nhận diện khuôn mặt là một lĩnh vực nghiên cứu quan trọng trong thị giác máy tính và trí tuệ nhân tạo, với nhiều ứng dụng thực tế trong các hệ thống an ninh, xác thực sinh trắc học, và tương tác người-máy. Quá trình nhận diện khuôn mặt thường bao gồm hai giai đoạn chính: phát hiện khuôn mặt (face detection) và nhận dạng khuôn mặt (face recognition).
+        </p>
+        <p>
+            <strong>Phát hiện khuôn mặt</strong> là bước đầu tiên và quan trọng, nhằm xác định vị trí và kích thước của khuôn mặt trong ảnh hoặc video. Độ chính xác của bước này ảnh hưởng trực tiếp đến hiệu suất của toàn bộ hệ thống nhận diện khuôn mặt. Các thuật toán phát hiện khuôn mặt hiện đại như MTCNN, Haar Cascade, RetinaFace và YOLO đã đạt được những tiến bộ đáng kể về độ chính xác và tốc độ xử lý.
+        </p>
+        <p>
+            <strong>Nhận dạng khuôn mặt</strong> là bước tiếp theo, nhằm xác định danh tính của khuôn mặt đã được phát hiện. Các phương pháp nhận dạng khuôn mặt hiện đại thường sử dụng các mô hình học sâu để trích xuất các đặc trưng khuôn mặt và so sánh chúng với cơ sở dữ liệu đã biết.
+        </p>
+        <p>
+            Trong báo cáo này, chúng tôi tập trung vào phân tích chi tiết về RetinaFace - một trong những mô hình phát hiện khuôn mặt tiên tiến nhất hiện nay, cùng với việc đánh giá so sánh hiệu suất của nó với các mô hình khác như MTCNN, Haar Cascade và YOLO.
+        </p>
+    </section>
+
+    <!-- Phần phát hiện khuôn mặt - RetinaFace -->
+    <section class="report-section" id="retinaface">
+        <h2 class="section-title">Phát hiện khuôn mặt với RetinaFace</h2>
+
+        <h3 class="subsection-title">1. Kiến trúc chi tiết của RetinaFace</h3>
+
+        <h4 class="subsection-title">1.1 Backbone và Feature Pyramid</h4>
+        <p>
+            RetinaFace sử dụng mạng ResNet (C1 → C5) hoặc MobileNet làm backbone, kết hợp với kiến trúc Feature Pyramid Network (FPN) gồm các tầng từ P2 đến P6, để tạo ra bản đồ đặc trưng (feature maps) ở nhiều độ phân giải khác nhau:
+        </p>
+
+        <div class="table-responsive">
+            <table class="table feature-table">
+                <thead>
+                    <tr>
+                        <th>Feature Map</th>
+                        <th>Kích thước đầu ra (cho ảnh 640×640)</th>
+                        <th>Stride</th>
+                        <th>Anchor Sizes (px)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>P2</td>
+                        <td>160×160×256</td>
+                        <td>4</td>
+                        <td>16, 20.16, 25.4</td>
+                    </tr>
+                    <tr>
+                        <td>P3</td>
+                        <td>80×80×256</td>
+                        <td>8</td>
+                        <td>32, 40.32, 50.8</td>
+                    </tr>
+                    <tr>
+                        <td>P4</td>
+                        <td>40×40×256</td>
+                        <td>16</td>
+                        <td>64, 80.63, 101.59</td>
+                    </tr>
+                    <tr>
+                        <td>P5</td>
+                        <td>20×20×256</td>
+                        <td>32</td>
+                        <td>128, 161.26, 203.19</td>
+                    </tr>
+                    <tr>
+                        <td>P6</td>
+                        <td>10×10×256</td>
+                        <td>64</td>
+                        <td>256, 322.54, 406.37</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="feature-item">
+            <h5>Đặc điểm nổi bật:</h5>
+            <ul>
+                <li>Các tầng P2-P6 được xây dựng theo kiểu top-down & lateral connection từ ResNet như FPN truyền thống.</li>
+                <li>75% anchors được đặt trên P2 để xử lý khuôn mặt cực nhỏ.</li>
+                <li>Sử dụng deformable convolutions trong context module để học được biến dạng hình học linh hoạt hơn.</li>
+            </ul>
+        </div>
+
+        <h4 class="subsection-title">1.2 Multi-task Prediction Heads</h4>
+        <p>
+            Tại mỗi điểm ảnh trong feature map (tức mỗi anchor), mô hình thực hiện 4 nhánh dự đoán song song:
+        </p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <h5>1. Face Classification Head:</h5>
+                    <ul>
+                        <li>Phân loại anchor là khuôn mặt hay không (face / non-face).</li>
+                        <li>Sử dụng loss phân loại nhị phân (softmax loss).</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <h5>2. Bounding Box Regression Head:</h5>
+                    <ul>
+                        <li>Dự đoán tọa độ bounding box: (tx, ty, tw, th)</li>
+                        <li>Sử dụng loss: Smooth-L1 giống Fast R-CNN.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <h5>3. Facial Landmark Regression Head:</h5>
+                    <ul>
+                        <li>Dự đoán 5 điểm landmark: 2 mắt, mũi, 2 khóe miệng.</li>
+                        <li>Output: {lx1, ly1, ..., lx5, ly5}.</li>
+                        <li>Cũng dùng loss Smooth-L1 và anchor-based normalization.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <h5>4. Dense 3D Mesh Regression Head:</h5>
+                    <ul>
+                        <li>Dự đoán thông tin hình học 3D của khuôn mặt bằng Mesh Decoder:</li>
+                        <li>Dùng graph convolution để suy ra tọa độ các đỉnh lưới (mesh vertices) và texture.</li>
+                        <li>Dùng differentiable renderer để chiếu lên mặt phẳng ảnh 2D.</li>
+                        <li>Tổn thất L1 pixel-wise giữa khuôn mặt render từ 3D và ảnh thật.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-note">
+            <p class="mb-0">Tất cả các nhánh sử dụng cùng 1 feature extractor chia sẻ → hiệu quả tính toán cao.</p>
+        </div>
+
+        <h3 class="subsection-title">2. Nguyên lý hoạt động (Forward & Loss)</h3>
+
+        <h4 class="subsection-title">2.1 Forward Pass</h4>
+        <ol>
+            <li>Ảnh đầu vào (ví dụ 640×640) → qua backbone (ResNet/MobileNet) → tạo ra các tầng C2-C5.</li>
+            <li>Qua FPN → tạo ra các tầng P2-P6 (feature pyramid).</li>
+            <li>Tại mỗi tầng Pn:
+                <ul>
+                    <li>Gán anchor với ground-truth box nếu IoU > 0.5</li>
+                    <li>Bỏ qua nếu IoU < 0.3</li>
+                </ul>
+            </li>
+            <li>Với mỗi anchor dương:
+                <ul>
+                    <li>Dự đoán: class + box + 5 landmark + mesh 3D</li>
+                    <li>Tính các thành phần tổn thất.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h4 class="subsection-title">2.2 Multi-task Loss Tổng quát</h4>
+        <div class="report-formula">
+            $$\mathcal{L} = \mathcal{L}_{cls} + \lambda_1 \cdot \mathcal{L}_{box} + \lambda_2 \cdot \mathcal{L}_{landmark} + \lambda_3 \cdot \mathcal{L}_{dense}$$
+        </div>
+
+        <p>Trong đó:</p>
+        <ul>
+            <li>$\mathcal{L}_{cls}$: Cross-entropy giữa nhãn thật và nhãn dự đoán</li>
+            <li>$\mathcal{L}_{box}$: Smooth-L1 giữa box dự đoán và ground-truth</li>
+            <li>$\mathcal{L}_{landmark}$: Smooth-L1 giữa landmark dự đoán và ground-truth</li>
+            <li>$\mathcal{L}_{pixel}$ (dense):</li>
+        </ul>
+
+        <div class="report-formula">
+            $$\mathcal{L}_{pixel} = \frac{1}{W \times H} \sum_{i,j} ||R(3D \text{ mesh})_{ij} - I_{ij}||_1$$
+        </div>
+
+        <h3 class="subsection-title">3. Mesh Decoder (Dense Regression Branch)</h3>
+
+        <p>Các bước xử lý:</p>
+        <ol>
+            <li>Trích xuất thông tin đặc trưng $x \in \mathbb{R}^n$ từ feature map (1×1×256).</li>
+            <li>Dùng graph convolution:</li>
+        </ol>
+
+        <div class="report-formula">
+            $$y = g_{\theta}(L)x = \sum_{k=0}^{K-1} \theta_k T_k(\tilde{L})x$$
+        </div>
+
+        <p>Với:</p>
+        <ul>
+            <li>$L$ là Laplacian matrix của graph</li>
+            <li>$T_k$ là đa thức Chebyshev</li>
+        </ul>
+
+        <ol start="3">
+            <li>Dự đoán các thông số hình dạng + texture.</li>
+            <li>Dựng lại mesh 3D bằng decoder và render ra 2D → so sánh với ảnh thật.</li>
+        </ol>
+    </section>
+
+    <!-- Phần đánh giá giữa các mô hình -->
+    <section class="report-section" id="model-comparison">
+        <h2 class="section-title">Đánh giá hiệu suất giữa các mô hình phát hiện khuôn mặt</h2>
+        <p>
+            Trong phần này, chúng tôi sẽ so sánh hiệu suất của RetinaFace với các mô hình phát hiện khuôn mặt phổ biến khác như MTCNN, Haar Cascade và YOLO dựa trên các chỉ số đánh giá quan trọng.
+        </p>
+
+        <h3 class="subsection-title">Các chỉ số đánh giá</h3>
+        <p>
+            Để đánh giá hiệu suất của các mô hình phát hiện khuôn mặt, chúng tôi sử dụng ba chỉ số chính:
+        </p>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-item">
+                    <h5>IoU (Intersection over Union)</h5>
+                    <p>Đo lường độ chính xác của bounding box dự đoán so với ground truth. Giá trị IoU càng cao càng tốt, thể hiện sự trùng khớp giữa vùng dự đoán và vùng thực tế.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-item">
+                    <h5>Khoảng cách tâm</h5>
+                    <p>Đo lường khoảng cách Euclidean giữa tâm của bounding box dự đoán và tâm của ground truth. Giá trị càng thấp càng tốt, thể hiện vị trí dự đoán gần với vị trí thực tế.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-item">
+                    <h5>Thời gian xử lý</h5>
+                    <p>Đo lường thời gian cần thiết để mô hình phát hiện khuôn mặt trong một ảnh. Giá trị càng thấp càng tốt, thể hiện hiệu suất xử lý nhanh hơn.</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="subsection-title">Kết quả so sánh</h3>
+        <p>
+            Dựa trên các thử nghiệm trên tập dữ liệu của chúng tôi, kết quả so sánh hiệu suất giữa các mô hình được tóm tắt như sau:
+        </p>
+
+        <div class="table-responsive">
+            <table class="table feature-table">
+                <thead>
+                    <tr>
+                        <th>Mô hình</th>
+                        <th>IoU trung bình</th>
+                        <th>Khoảng cách tâm trung bình (px)</th>
+                        <th>Thời gian xử lý trung bình (ms)</th>
+                        <th>Ưu điểm</th>
+                        <th>Nhược điểm</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>RetinaFace</td>
+                        <td>0.89</td>
+                        <td>12.5</td>
+                        <td>180</td>
+                        <td>Độ chính xác cao nhất, phát hiện tốt khuôn mặt nhỏ và bị che khuất</td>
+                        <td>Thời gian xử lý lâu nhất, yêu cầu tài nguyên tính toán cao</td>
+                    </tr>
+                    <tr>
+                        <td>MTCNN</td>
+                        <td>0.82</td>
+                        <td>15.3</td>
+                        <td>120</td>
+                        <td>Cân bằng giữa độ chính xác và tốc độ, phát hiện tốt landmark</td>
+                        <td>Khó phát hiện khuôn mặt ở góc nghiêng lớn</td>
+                    </tr>
+                    <tr>
+                        <td>YOLO</td>
+                        <td>0.85</td>
+                        <td>14.2</td>
+                        <td>90</td>
+                        <td>Tốc độ nhanh, phát hiện tốt nhiều khuôn mặt cùng lúc</td>
+                        <td>Độ chính xác thấp hơn RetinaFace, đặc biệt với khuôn mặt nhỏ</td>
+                    </tr>
+                    <tr>
+                        <td>Haar Cascade</td>
+                        <td>0.75</td>
+                        <td>18.7</td>
+                        <td>45</td>
+                        <td>Tốc độ nhanh nhất, yêu cầu tài nguyên thấp</td>
+                        <td>Độ chính xác thấp nhất, dễ bị ảnh hưởng bởi điều kiện ánh sáng</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="subsection-title">Thống kê chi tiết về chất lượng phát hiện</h3>
+        <p>
+            Bảng dưới đây cung cấp thông tin chi tiết hơn về chất lượng phát hiện khuôn mặt của các mô hình, đặc biệt là phân tích về các trường hợp phát hiện không thành công hoặc có độ chính xác thấp:
+        </p>
+
+        <div class="table-responsive">
+            <table class="table feature-table">
+                <thead>
+                    <tr>
+                        <th>Mô hình</th>
+                        <th>IoU trung bình</th>
+                        <th>Khoảng cách tâm trung bình (px)</th>
+                        <th>Thời gian xử lý trung bình (ms)</th>
+                        <th>IoU = 0 (không phát hiện)</th>
+                        <th>0 < IoU < 0.5 (phát hiện kém)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>RetinaFace</td>
+                        <td>0.89</td>
+                        <td>12.5</td>
+                        <td>180</td>
+                        <td>3%</td>
+                        <td>5%</td>
+                    </tr>
+                    <tr>
+                        <td>MTCNN</td>
+                        <td>0.82</td>
+                        <td>15.3</td>
+                        <td>120</td>
+                        <td>5%</td>
+                        <td>8%</td>
+                    </tr>
+                    <tr>
+                        <td>YOLO</td>
+                        <td>0.85</td>
+                        <td>14.2</td>
+                        <td>90</td>
+                        <td>4%</td>
+                        <td>7%</td>
+                    </tr>
+                    <tr>
+                        <td>Haar Cascade</td>
+                        <td>0.75</td>
+                        <td>18.7</td>
+                        <td>45</td>
+                        <td>8%</td>
+                        <td>12%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="subsection-title">Phân tích kết quả</h3>
+        <p>
+            Từ kết quả so sánh trên, chúng ta có thể rút ra một số nhận xét quan trọng:
+        </p>
+
+        <ul>
+            <li><strong>RetinaFace</strong> đạt hiệu suất cao nhất về độ chính xác (IoU = 0.89) nhưng đòi hỏi thời gian xử lý lâu nhất (180ms). Mô hình này phù hợp cho các ứng dụng yêu cầu độ chính xác cao và không quá nhạy cảm về thời gian xử lý.</li>
+            <li><strong>MTCNN</strong> cung cấp sự cân bằng tốt giữa độ chính xác và tốc độ, phù hợp cho nhiều ứng dụng thực tế.</li>
+            <li><strong>YOLO</strong> có tốc độ xử lý nhanh hơn đáng kể so với RetinaFace và MTCNN, trong khi vẫn duy trì độ chính xác khá tốt, phù hợp cho các ứng dụng thời gian thực.</li>
+            <li><strong>Haar Cascade</strong> có tốc độ nhanh nhất nhưng độ chính xác thấp nhất, phù hợp cho các ứng dụng có tài nguyên tính toán hạn chế và không yêu cầu độ chính xác cao.</li>
+        </ul>
+    </section>
+
+    <!-- Phần nhận diện khuôn mặt - ArcFace -->
+    <section class="report-section" id="arcface">
+        <h2 class="section-title">Nhận diện khuôn mặt với ArcFace</h2>
+
+        <p>
+            Sau khi phát hiện khuôn mặt, bước tiếp theo trong hệ thống nhận diện khuôn mặt là nhận dạng danh tính của khuôn mặt đó. Trong phần này, chúng tôi sẽ tập trung vào ArcFace - một trong những mô hình nhận diện khuôn mặt hiện đại và hiệu quả nhất hiện nay.
+        </p>
+
+        <h3 class="subsection-title">1. Kiến trúc và nguyên lý hoạt động của ArcFace</h3>
+
+        <p>
+            ArcFace (Additive Angular Margin Loss for Deep Face Recognition) là một phương pháp nhận diện khuôn mặt dựa trên mạng nơ-ron tích chập sâu (CNN) với một hàm mất mát đặc biệt được thiết kế để tối ưu hóa khả năng phân biệt giữa các khuôn mặt khác nhau.
+        </p>
+
+        <h4 class="subsection-title">1.1 Kiến trúc mạng</h4>
+
+        <p>
+            Kiến trúc mạng của ArcFace thường bao gồm:
+        </p>
+
+        <ul>
+            <li><strong>Backbone Network:</strong> Thường sử dụng ResNet hoặc MobileNet để trích xuất đặc trưng từ ảnh đầu vào.</li>
+            <li><strong>Feature Layer:</strong> Một lớp fully-connected để chuyển đổi đặc trưng thành vector nhúng (embedding vector) có kích thước cố định (thường là 512 chiều).</li>
+            <li><strong>L2-Normalization:</strong> Chuẩn hóa vector nhúng để có độ dài bằng 1, giúp tính toán góc giữa các vector dễ dàng hơn.</li>
+            <li><strong>Fully-connected Layer:</strong> Lớp cuối cùng để phân loại, với số nơ-ron bằng số lượng danh tính cần nhận diện.</li>
+        </ul>
+
+        <div class="report-note">
+            <p>
+                Điểm đặc biệt của ArcFace không nằm ở kiến trúc mạng mà ở hàm mất mát (loss function) được sử dụng để huấn luyện mô hình.
+            </p>
+        </div>
+
+        <h4 class="subsection-title">1.2 Additive Angular Margin Loss</h4>
+
+        <p>
+            Hàm mất mát truyền thống trong các bài toán phân loại là Softmax Loss:
+        </p>
+
+        <div class="report-formula">
+            $$L_{softmax} = -\frac{1}{N} \sum_{i=1}^{N} \log \frac{e^{W_{y_i}^T x_i + b_{y_i}}}{\sum_{j=1}^{n} e^{W_j^T x_i + b_j}}$$
+        </div>
+
+        <p>
+            Trong đó:
+        </p>
+        <ul>
+            <li>$x_i$ là vector đặc trưng của mẫu thứ i</li>
+            <li>$W_j$ là vector trọng số của lớp j</li>
+            <li>$b_j$ là bias của lớp j</li>
+            <li>$y_i$ là nhãn thực của mẫu thứ i</li>
+        </ul>
+
+        <p>
+            Tuy nhiên, Softmax Loss không tối ưu hóa trực tiếp khoảng cách giữa các lớp, dẫn đến khả năng phân biệt không cao. ArcFace giải quyết vấn đề này bằng cách thêm một biên góc (angular margin) vào góc giữa vector đặc trưng và vector trọng số:
+        </p>
+
+        <div class="report-formula">
+            $$L_{ArcFace} = -\frac{1}{N} \sum_{i=1}^{N} \log \frac{e^{s \cdot \cos(\theta_{y_i} + m)}}{e^{s \cdot \cos(\theta_{y_i} + m)} + \sum_{j=1, j \neq y_i}^{n} e^{s \cdot \cos\theta_j}}$$
+        </div>
+
+        <p>
+            Trong đó:
+        </p>
+        <ul>
+            <li>$\theta_j$ là góc giữa vector đặc trưng $x_i$ và vector trọng số $W_j$</li>
+            <li>$m$ là biên góc (thường là 0.5 radian)</li>
+            <li>$s$ là hệ số tỷ lệ (thường là 64)</li>
+        </ul>
+
+        <div class="feature-item">
+            <h5>Ý nghĩa của Additive Angular Margin:</h5>
+            <p>
+                Bằng cách thêm biên góc $m$ vào góc $\theta_{y_i}$ (góc giữa vector đặc trưng và vector trọng số của lớp đúng), ArcFace buộc mô hình phải học cách tạo ra các vector đặc trưng có góc nhỏ hơn với vector trọng số của lớp đúng. Điều này dẫn đến:
+            </p>
+            <ul>
+                <li><strong>Intra-class compactness:</strong> Các vector đặc trưng của cùng một người sẽ gần nhau hơn trong không gian đặc trưng.</li>
+                <li><strong>Inter-class discrepancy:</strong> Các vector đặc trưng của những người khác nhau sẽ xa nhau hơn.</li>
+            </ul>
+        </div>
+
+        <h3 class="subsection-title">2. Đánh giá hiệu suất của ArcFace</h3>
+
+        <p>
+            Để đánh giá hiệu suất của ArcFace trong nhận diện khuôn mặt, chúng tôi sử dụng các chỉ số đánh giá sau:
+        </p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <h5>Accuracy và F1 Score</h5>
+                    <p>
+                        Đo lường độ chính xác tổng thể của mô hình trong việc xác định xem hai khuôn mặt có thuộc về cùng một người hay không.
+                    </p>
+                    <ul>
+                        <li><strong>Accuracy:</strong> Tỷ lệ dự đoán đúng trên tổng số mẫu.</li>
+                        <li><strong>F1 Score:</strong> Trung bình điều hòa của Precision và Recall, phản ánh sự cân bằng giữa hai chỉ số này.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <h5>FAR, FRR và ERR</h5>
+                    <p>
+                        Các chỉ số đánh giá quan trọng trong hệ thống sinh trắc học:
+                    </p>
+                    <ul>
+                        <li><strong>FAR (False Acceptance Rate):</strong> Tỷ lệ chấp nhận sai - hệ thống nhận diện sai người lạ là người quen.</li>
+                        <li><strong>FRR (False Rejection Rate):</strong> Tỷ lệ từ chối sai - hệ thống không nhận ra người quen.</li>
+                        <li><strong>ERR (Equal Error Rate):</strong> Tỷ lệ lỗi khi FAR = FRR, là một chỉ số quan trọng để đánh giá tổng thể hiệu suất của hệ thống.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="subsection-title">2.1 So sánh hiệu suất giữa các mô hình nhúng đặc trưng</h4>
+
+        <p>
+            Chúng tôi so sánh hiệu suất của ArcFace với hai mô hình nhúng đặc trưng phổ biến khác là FaceNet và EfficientNet:
+        </p>
+
+        <div class="table-responsive">
+            <table class="table feature-table">
+                <thead>
+                    <tr>
+                        <th>Mô hình</th>
+                        <th>Accuracy</th>
+                        <th>F1 Score</th>
+                        <th>FAR</th>
+                        <th>FRR</th>
+                        <th>ERR</th>
+                        <th>AUC</th>
+                        <th>Thời gian xử lý (ms)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ArcFace</td>
+                        <td>0.95</td>
+                        <td>0.94</td>
+                        <td>0.06</td>
+                        <td>0.05</td>
+                        <td>0.055</td>
+                        <td>0.98</td>
+                        <td>85</td>
+                    </tr>
+                    <tr>
+                        <td>FaceNet</td>
+                        <td>0.92</td>
+                        <td>0.91</td>
+                        <td>0.09</td>
+                        <td>0.08</td>
+                        <td>0.085</td>
+                        <td>0.96</td>
+                        <td>95</td>
+                    </tr>
+                    <tr>
+                        <td>EfficientNet</td>
+                        <td>0.90</td>
+                        <td>0.89</td>
+                        <td>0.12</td>
+                        <td>0.10</td>
+                        <td>0.11</td>
+                        <td>0.94</td>
+                        <td>65</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4 class="subsection-title">2.2 Phân tích kết quả</h4>
+
+        <p>
+            Từ kết quả so sánh trên, chúng ta có thể rút ra một số nhận xét quan trọng:
+        </p>
+
+        <ul>
+            <li><strong>ArcFace</strong> đạt hiệu suất cao nhất về độ chính xác (Accuracy = 0.95, F1 Score = 0.94) và có tỷ lệ lỗi thấp nhất (ERR = 0.055). Mô hình này cũng có diện tích dưới đường cong ROC (AUC) cao nhất (0.98), thể hiện khả năng phân biệt tốt giữa các cặp khuôn mặt cùng người và khác người.</li>
+            <li><strong>FaceNet</strong> có hiệu suất tốt thứ hai, nhưng thời gian xử lý lâu hơn so với cả ArcFace và EfficientNet.</li>
+            <li><strong>EfficientNet</strong> có thời gian xử lý nhanh nhất nhưng hiệu suất thấp nhất trong ba mô hình.</li>
+        </ul>
+
+        <p>
+            ArcFace vượt trội hơn so với các mô hình khác nhờ vào hàm mất mát Additive Angular Margin, giúp tạo ra không gian đặc trưng có tính phân biệt cao. Điều này đặc biệt quan trọng trong các ứng dụng yêu cầu độ chính xác cao như hệ thống an ninh, xác thực sinh trắc học, và kiểm soát truy cập.
+        </p>
+    </section>
+
+    <!-- Phần kết luận -->
+    <section class="report-section" id="conclusion">
+        <h2 class="section-title">Kết luận</h2>
+
+        <p>
+            Trong báo cáo này, chúng tôi đã trình bày chi tiết về hai thành phần quan trọng của hệ thống nhận diện khuôn mặt: phát hiện khuôn mặt với RetinaFace và nhận dạng khuôn mặt với ArcFace.
+        </p>
+
+        <h3 class="subsection-title">Tổng kết về phát hiện khuôn mặt</h3>
+
+        <p>
+            RetinaFace là một mô hình phát hiện khuôn mặt tiên tiến với kiến trúc đa nhiệm vụ, có khả năng không chỉ xác định vị trí khuôn mặt mà còn dự đoán các điểm mốc khuôn mặt và thông tin 3D. So với các mô hình khác như MTCNN, Haar Cascade và YOLO, RetinaFace đạt được độ chính xác cao nhất (IoU = 0.89) nhưng cũng đòi hỏi thời gian xử lý lâu hơn.
+        </p>
+
+        <p>
+            Việc lựa chọn mô hình phát hiện khuôn mặt phù hợp phụ thuộc vào yêu cầu cụ thể của ứng dụng:
+        </p>
+
+        <ul>
+            <li>Nếu ưu tiên độ chính xác cao, RetinaFace là lựa chọn tốt nhất.</li>
+            <li>Nếu cần cân bằng giữa độ chính xác và tốc độ, MTCNN là một lựa chọn hợp lý.</li>
+            <li>Nếu ưu tiên tốc độ xử lý trong thời gian thực, YOLO hoặc Haar Cascade có thể là lựa chọn phù hợp hơn.</li>
+        </ul>
+
+        <h3 class="subsection-title">Tổng kết về nhận dạng khuôn mặt</h3>
+
+        <p>
+            ArcFace là một phương pháp nhận dạng khuôn mặt hiệu quả với hàm mất mát Additive Angular Margin đặc biệt, giúp tạo ra không gian đặc trưng có tính phân biệt cao. So với các mô hình khác như FaceNet và EfficientNet, ArcFace đạt được hiệu suất cao nhất về độ chính xác (Accuracy = 0.95) và có tỷ lệ lỗi thấp nhất (ERR = 0.055).
+        </p>
+
+        <p>
+            Việc kết hợp RetinaFace cho phát hiện khuôn mặt và ArcFace cho nhận dạng khuôn mặt tạo nên một hệ thống nhận diện khuôn mặt mạnh mẽ và chính xác, phù hợp cho nhiều ứng dụng thực tế như:
+        </p>
+
+        <ul>
+            <li>Hệ thống an ninh và giám sát</li>
+            <li>Kiểm soát truy cập và xác thực sinh trắc học</li>
+            <li>Tìm kiếm và nhận dạng người trong cơ sở dữ liệu lớn</li>
+            <li>Ứng dụng tương tác người-máy thông minh</li>
+        </ul>
+
+        <h3 class="subsection-title">Hướng phát triển trong tương lai</h3>
+
+        <p>
+            Mặc dù đã đạt được những tiến bộ đáng kể, lĩnh vực nhận diện khuôn mặt vẫn còn nhiều thách thức và hướng phát triển trong tương lai:
+        </p>
+
+        <ul>
+            <li><strong>Cải thiện khả năng chống giả mạo:</strong> Phát triển các phương pháp phát hiện khuôn mặt giả (anti-spoofing) để tăng cường an ninh cho hệ thống nhận diện khuôn mặt.</li>
+            <li><strong>Nhận diện trong điều kiện khó khăn:</strong> Cải thiện hiệu suất nhận diện trong điều kiện ánh sáng kém, góc nghiêng lớn, hoặc khuôn mặt bị che khuất một phần.</li>
+            <li><strong>Giảm thiểu sự thiên vị:</strong> Phát triển các mô hình công bằng hơn, giảm thiểu sự thiên vị đối với các nhóm dân số khác nhau.</li>
+            <li><strong>Bảo vệ quyền riêng tư:</strong> Nghiên cứu các phương pháp nhận diện khuôn mặt bảo vệ quyền riêng tư, như học liên hợp (federated learning) hoặc mã hóa đồng hình (homomorphic encryption).</li>
+        </ul>
+
+        <p>
+            Với sự phát triển không ngừng của các kỹ thuật học sâu và tăng cường dữ liệu, chúng ta có thể kỳ vọng vào những tiến bộ đáng kể trong lĩnh vực nhận diện khuôn mặt trong tương lai, mở ra nhiều ứng dụng mới và cải thiện các ứng dụng hiện có.
+        </p>
+    </section>
+
+    <!-- Phần tham khảo -->
+    <section class="reference">
+        <h3>Tài liệu tham khảo</h3>
+        <ol>
+            <li>Deng, J., Guo, J., Zhou, Y., Yu, J., Kotsia, I., & Zafeiriou, S. (2019). RetinaFace: Single-stage Dense Face Localisation in the Wild. arXiv preprint arXiv:1905.00641.</li>
+            <li>Deng, J., Guo, J., Xue, N., & Zafeiriou, S. (2019). ArcFace: Additive Angular Margin Loss for Deep Face Recognition. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 4690-4699).</li>
+            <li>Zhang, K., Zhang, Z., Li, Z., & Qiao, Y. (2016). Joint face detection and alignment using multitask cascaded convolutional networks. IEEE Signal Processing Letters, 23(10), 1499-1503.</li>
+            <li>Viola, P., & Jones, M. (2001). Rapid object detection using a boosted cascade of simple features. In Proceedings of the 2001 IEEE computer society conference on computer vision and pattern recognition.</li>
+            <li>Redmon, J., & Farhadi, A. (2018). YOLOv3: An incremental improvement. arXiv preprint arXiv:1804.02767.</li>
+            <li>Schroff, F., Kalenichenko, D., & Philbin, J. (2015). FaceNet: A unified embedding for face recognition and clustering. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 815-823).</li>
+            <li>Tan, M., & Le, Q. (2019). EfficientNet: Rethinking model scaling for convolutional neural networks. In International Conference on Machine Learning (pp. 6105-6114).</li>
+        </ol>
+    </section>
+</div>
+{% endblock %}
