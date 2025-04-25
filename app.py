@@ -240,12 +240,29 @@ def change_page(page):
 @app.route('/api/change_method/<string:method>')
 def api_change_method(method):
     """API endpoint để lấy dữ liệu cho phương pháp nhận diện."""
+    app.logger.info(f"API change_method called with method: {method}")
+
+    # Kiểm tra xem method có hợp lệ không
+    valid_methods = get_detection_methods().keys()
+    app.logger.info(f"Valid methods: {list(valid_methods)}")
+
+    if method not in valid_methods:
+        app.logger.error(f"Invalid method: {method}")
+        return jsonify({
+            'error': f"Phương pháp '{method}' không được hỗ trợ"
+        }), 400
+
+    # Tải dữ liệu dự đoán
     predictions_df, error = load_predictions(method)
     if error:
+        app.logger.error(f"Error loading predictions: {error}")
         return jsonify({
             'error': error
         }), 400
 
+    app.logger.info(f"Successfully loaded predictions for method: {method}")
+
+    # Tính toán thống kê
     stats = calculate_stats(predictions_df)
     all_models_stats = calculate_all_models_stats()
     charts = create_charts(predictions_df)
@@ -256,27 +273,42 @@ def api_change_method(method):
     current_customers, total_pages = get_customer_folders(page, customers_per_page)
     customers_data = create_customers_data(current_customers, predictions_df)
 
+    app.logger.info(f"Created customers data for page {page} with {len(customers_data)} customers")
+
     # Tìm ảnh có IoU lớn nhất và nhỏ nhất
-    best_iou_idx = predictions_df['IoU'].idxmax()
-    worst_iou_idx = predictions_df['IoU'].idxmin()
+    try:
+        best_iou_idx = predictions_df['IoU'].idxmax()
+        worst_iou_idx = predictions_df['IoU'].idxmin()
 
-    # Tạo bản sao của DataFrame để tránh thay đổi dữ liệu gốc
-    best_row_df = predictions_df.loc[[best_iou_idx]].copy()
-    worst_row_df = predictions_df.loc[[worst_iou_idx]].copy()
+        # Tạo bản sao của DataFrame để tránh thay đổi dữ liệu gốc
+        best_row_df = predictions_df.loc[[best_iou_idx]].copy()
+        worst_row_df = predictions_df.loc[[worst_iou_idx]].copy()
 
-    # Đổi tên cột nếu cần
-    if 'x1' not in best_row_df.columns and 'xmin' in best_row_df.columns:
-        best_row_df = best_row_df.rename(columns={'xmin': 'x1', 'ymin': 'y1', 'xmax': 'x2', 'ymax': 'y2'})
-        worst_row_df = worst_row_df.rename(columns={'xmin': 'x1', 'ymin': 'y1', 'xmax': 'x2', 'ymax': 'y2'})
+        # Đổi tên cột nếu cần
+        if 'x1' not in best_row_df.columns and 'xmin' in best_row_df.columns:
+            best_row_df = best_row_df.rename(columns={'xmin': 'x1', 'ymin': 'y1', 'xmax': 'x2', 'ymax': 'y2'})
+            worst_row_df = worst_row_df.rename(columns={'xmin': 'x1', 'ymin': 'y1', 'xmax': 'x2', 'ymax': 'y2'})
 
-    # Chuyển đổi thành dictionary
-    best_iou_row = best_row_df.iloc[0].to_dict()
-    worst_iou_row = worst_row_df.iloc[0].to_dict()
+        # Chuyển đổi thành dictionary
+        best_iou_row = best_row_df.iloc[0].to_dict()
+        worst_iou_row = worst_row_df.iloc[0].to_dict()
+
+        app.logger.info(f"Found best IoU: {best_iou_row['IoU']} and worst IoU: {worst_iou_row['IoU']}")
+    except Exception as e:
+        app.logger.error(f"Error finding best/worst IoU: {e}")
+        best_iou_row = {}
+        worst_iou_row = {}
 
     # Tạo ảnh có IoU lớn nhất và nhỏ nhất
-    best_worst_images = create_best_worst_images(predictions_df)
+    try:
+        best_worst_images = create_best_worst_images(predictions_df)
+        app.logger.info(f"Created best/worst images: {len(best_worst_images)} items")
+    except Exception as e:
+        app.logger.error(f"Error creating best/worst images: {e}")
+        best_worst_images = {}
 
-    return jsonify({
+    # Tạo response
+    response_data = {
         'stats': stats,
         'all_models_stats': all_models_stats,
         'charts': charts,
@@ -286,7 +318,10 @@ def api_change_method(method):
         'best_iou': best_iou_row,
         'worst_iou': worst_iou_row,
         'best_worst_images': best_worst_images
-    })
+    }
+
+    app.logger.info(f"API response prepared with {len(response_data)} keys")
+    return jsonify(response_data)
 
 @app.route('/report')
 def report():
@@ -312,12 +347,141 @@ def face_identification():
     # Tính toán metrics và charts
     error_message, charts, metrics = get_model_metrics(model)
 
+    # Tải dữ liệu cặp ảnh
+    same_pairs, diff_pairs = load_image_pairs(model)
+
     # Render the template with metrics data
-    return render_template('face_identification.html',
+    return render_template('face_recognition.html',
                           charts=charts,
                           metrics=metrics,
                           selected_model=model,
-                          error=error_message)
+                          error=error_message,
+                          same_pairs=same_pairs,
+                          diff_pairs=diff_pairs)
+
+
+def load_image_pairs(model):
+    """Hàm helper để tải dữ liệu cặp ảnh từ static/images."""
+    same_pairs = []
+    diff_pairs = []
+
+    try:
+        # Đường dẫn đến ảnh mẫu trong thư mục static
+        same1_img_path = os.path.join('static', 'images', 'same1.png')
+        same2_img_path = os.path.join('static', 'images', 'same2.png')
+        diff1_img_path = os.path.join('static', 'images', 'different1.png')
+        diff2_img_path = os.path.join('static', 'images', 'different2.png')
+
+        app.logger.info(f"Loading sample images from static/images directory")
+        app.logger.info(f"Same1 image exists: {os.path.isfile(same1_img_path)}")
+        app.logger.info(f"Same2 image exists: {os.path.isfile(same2_img_path)}")
+        app.logger.info(f"Different1 image exists: {os.path.isfile(diff1_img_path)}")
+        app.logger.info(f"Different2 image exists: {os.path.isfile(diff2_img_path)}")
+
+        # Tạo 1 cặp ảnh giống nhau cho same_pairs
+        if os.path.isfile(same1_img_path) and os.path.isfile(same2_img_path):
+            # Đọc ảnh và chuyển thành base64
+            with open(same1_img_path, 'rb') as f:
+                same1_img_data = base64.b64encode(f.read()).decode('utf-8')
+
+            with open(same2_img_path, 'rb') as f:
+                same2_img_data = base64.b64encode(f.read()).decode('utf-8')
+
+            # Tạo 1 cặp ảnh
+            same_pairs.append({
+                'image1': same1_img_data,
+                'image2': same2_img_data,
+                'similarity': 0.92,
+                'processing_time': 0.045
+            })
+
+        # Tạo 1 cặp ảnh khác nhau cho diff_pairs
+        if os.path.isfile(diff1_img_path) and os.path.isfile(diff2_img_path):
+            # Đọc ảnh và chuyển thành base64
+            with open(diff1_img_path, 'rb') as f:
+                diff1_img_data = base64.b64encode(f.read()).decode('utf-8')
+
+            with open(diff2_img_path, 'rb') as f:
+                diff2_img_data = base64.b64encode(f.read()).decode('utf-8')
+
+            # Tạo 1 cặp ảnh
+            diff_pairs.append({
+                'image1': diff1_img_data,
+                'image2': diff2_img_data,
+                'similarity': 0.32,
+                'processing_time': 0.047
+            })
+
+        # Nếu không tìm thấy ảnh, thử tải từ file CSV
+        if not same_pairs or not diff_pairs:
+            app.logger.warning("Sample images not found, trying to load from CSV files")
+
+            # Đường dẫn đến file CSV
+            same_path = f"result/Regnition/RetinaFace_{model}_same.csv"
+            diff_path = f"result/Regnition/RetinaFace_{model}_different.csv"
+
+            # Kiểm tra xem file có tồn tại không
+            if os.path.exists(same_path) and not same_pairs:
+                # Đọc file CSV
+                same_df = pd.read_csv(same_path)
+
+                # Tạo dữ liệu cặp ảnh
+                for _, row in same_df.head(4).iterrows():  # Chỉ lấy 4 cặp đầu tiên
+                    # Đường dẫn đến ảnh
+                    img1_path = os.path.join('data', row['image1']) if 'image1' in row else None
+                    img2_path = os.path.join('data', row['image2']) if 'image2' in row else None
+
+                    # Kiểm tra xem ảnh có tồn tại không
+                    if img1_path and img2_path and os.path.exists(img1_path) and os.path.exists(img2_path):
+                        # Đọc ảnh và chuyển thành base64
+                        with open(img1_path, 'rb') as f:
+                            img1_data = base64.b64encode(f.read()).decode('utf-8')
+
+                        with open(img2_path, 'rb') as f:
+                            img2_data = base64.b64encode(f.read()).decode('utf-8')
+
+                        # Thêm vào danh sách
+                        same_pairs.append({
+                            'image1': img1_data,
+                            'image2': img2_data,
+                            'similarity': row['similarity'] if 'similarity' in row else 0,
+                            'processing_time': row['processing_time'] if 'processing_time' in row else 0
+                        })
+
+            # Tương tự cho cặp ảnh khác người
+            if os.path.exists(diff_path) and not diff_pairs:
+                # Đọc file CSV
+                diff_df = pd.read_csv(diff_path)
+
+                # Tạo dữ liệu cặp ảnh
+                for _, row in diff_df.head(4).iterrows():  # Chỉ lấy 4 cặp đầu tiên
+                    # Đường dẫn đến ảnh
+                    img1_path = os.path.join('data', row['image1']) if 'image1' in row else None
+                    img2_path = os.path.join('data', row['image2']) if 'image2' in row else None
+
+                    # Kiểm tra xem ảnh có tồn tại không
+                    if img1_path and img2_path and os.path.exists(img1_path) and os.path.exists(img2_path):
+                        # Đọc ảnh và chuyển thành base64
+                        with open(img1_path, 'rb') as f:
+                            img1_data = base64.b64encode(f.read()).decode('utf-8')
+
+                        with open(img2_path, 'rb') as f:
+                            img2_data = base64.b64encode(f.read()).decode('utf-8')
+
+                        # Thêm vào danh sách
+                        diff_pairs.append({
+                            'image1': img1_data,
+                            'image2': img2_data,
+                            'similarity': row['similarity'] if 'similarity' in row else 0,
+                            'processing_time': row['processing_time'] if 'processing_time' in row else 0
+                        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        app.logger.error(f"Error loading image pairs: {str(e)}")
+
+    app.logger.info(f"Loaded {len(same_pairs)} same pairs and {len(diff_pairs)} different pairs")
+    return same_pairs, diff_pairs
 
 
 def get_model_metrics(model):

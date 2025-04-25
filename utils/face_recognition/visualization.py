@@ -17,10 +17,10 @@ def create_charts(predictions_df):
     # Biểu đồ IoU
     fig1 = Figure(figsize=(10, 4))  # Tăng chiều cao từ 3 lên 4
     ax1 = fig1.add_subplot(1, 1, 1)
-    
+
     # Vẽ histogram
     hist = sns.histplot(data=predictions_df['IoU'], bins=20, kde=True, ax=ax1, color='green')
-    
+
     # Thêm giá trị trên mỗi cột
     for i in hist.patches:
         hist.annotate(f'{int(i.get_height())}',
@@ -33,7 +33,7 @@ def create_charts(predictions_df):
     ax1.set_ylabel('Tần suất')
     ax1.set_title('Phân phối giá trị IoU')
     ax1.grid(True, alpha=0.3)
-    
+
     # Thêm padding để tránh bị cắt
     fig1.tight_layout(pad=1.5)
 
@@ -46,9 +46,9 @@ def create_charts(predictions_df):
     # Biểu đồ khoảng cách tâm
     fig2 = Figure(figsize=(10, 4))
     ax2 = fig2.add_subplot(1, 1, 1)
-    
+
     hist = sns.histplot(data=predictions_df['center_distance'], bins=20, kde=True, ax=ax2, color='red')
-    
+
     # Thêm giá trị trên mỗi cột
     for i in hist.patches:
         hist.annotate(f'{int(i.get_height())}',
@@ -61,7 +61,7 @@ def create_charts(predictions_df):
     ax2.set_ylabel('Tần suất')
     ax2.set_title('Phân phối khoảng cách tâm')
     ax2.grid(True, alpha=0.3)
-    
+
     fig2.tight_layout(pad=1.5)
 
     buf = io.BytesIO()
@@ -72,9 +72,9 @@ def create_charts(predictions_df):
     # Biểu đồ thời gian xử lý
     fig3 = Figure(figsize=(10, 4))
     ax3 = fig3.add_subplot(1, 1, 1)
-    
+
     hist = sns.histplot(data=predictions_df['inference_time'], bins=20, kde=True, ax=ax3, color='blue')
-    
+
     # Thêm giá trị trên mỗi cột
     for i in hist.patches:
         hist.annotate(f'{int(i.get_height())}',
@@ -87,7 +87,7 @@ def create_charts(predictions_df):
     ax3.set_ylabel('Tần suất')
     ax3.set_title('Phân phối thời gian xử lý')
     ax3.grid(True, alpha=0.3)
-    
+
     fig3.tight_layout(pad=1.5)
 
     buf = io.BytesIO()
@@ -97,9 +97,30 @@ def create_charts(predictions_df):
 
     return charts
 
-def create_best_worst_images(best_iou_row, worst_iou_row):
-    """Tạo ảnh có IoU lớn nhất và nhỏ nhất."""
+def create_best_worst_images(predictions_df):
+    """Tạo ảnh có IoU lớn nhất và nhỏ nhất từ DataFrame."""
     images = {}
+
+    # Tìm ảnh có IoU lớn nhất và nhỏ nhất
+    try:
+        best_iou_idx = predictions_df['IoU'].idxmax()
+        worst_iou_idx = predictions_df['IoU'].idxmin()
+
+        # Tạo bản sao của DataFrame để tránh thay đổi dữ liệu gốc
+        best_row_df = predictions_df.loc[[best_iou_idx]].copy()
+        worst_row_df = predictions_df.loc[[worst_iou_idx]].copy()
+
+        # Đổi tên cột nếu cần
+        if 'x1' not in best_row_df.columns and 'xmin' in best_row_df.columns:
+            best_row_df = best_row_df.rename(columns={'xmin': 'x1', 'ymin': 'y1', 'xmax': 'x2', 'ymax': 'y2'})
+            worst_row_df = worst_row_df.rename(columns={'xmin': 'x1', 'ymin': 'y1', 'xmax': 'x2', 'ymax': 'y2'})
+
+        # Chuyển đổi thành dictionary
+        best_iou_row = best_row_df.iloc[0].to_dict()
+        worst_iou_row = worst_row_df.iloc[0].to_dict()
+    except Exception as e:
+        print(f"Error finding best/worst IoU: {e}")
+        return images
 
     # In ra các khóa trong best_iou_row và worst_iou_row
     print("Best IoU Row Keys:", best_iou_row.keys())

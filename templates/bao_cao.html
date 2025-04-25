@@ -1,12 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Báo cáo khoa học{% endblock %}
+{% block title %}Báo cáo khóa luận tốt nghiệp{% endblock %}
 
 {% block extra_css %}
 <!-- MathJax for rendering mathematical formulas -->
 <script type="text/javascript" async
   src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
+<!-- Chart.js for data visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     tex2jax: {
@@ -24,6 +28,7 @@
     /* Styling for scientific report */
     .report-section {
         margin-bottom: 2.5rem;
+        position: relative;
     }
 
     .report-title {
@@ -153,12 +158,80 @@
         font-family: 'Courier New', monospace;
         overflow-x: auto;
     }
+
+    /* Back to top button */
+    .back-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+        z-index: 1000;
+    }
+
+    .back-to-top:hover {
+        background-color: #0056b3;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .back-to-top.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .back-to-top i {
+        font-size: 20px;
+    }
 </style>
+
+<script>
+    // Script for back to top button
+    document.addEventListener('DOMContentLoaded', function() {
+        var backToTopButton = document.querySelector('.back-to-top');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        // Smooth scroll to top when button is clicked
+        backToTopButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
 {% endblock %}
 
 {% block content %}
 <div class="container report-content">
     <h1 class="text-center report-title">Báo cáo về nhận diện khách hàng trong hệ thống chatbot bán hàng</h1>
+
+    <!-- Back to top button -->
+    <a href="#" class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </a>
 
     <!-- Phần giới thiệu -->
     <section class="report-section" id="introduction">
@@ -189,15 +262,35 @@
         </p>
 
         <p>
-            Chúng tôi đã lựa chọn RetinaFace làm nền tảng cho hệ thống phát hiện khuôn mặt trong chatbot bán hàng của mình vì hiệu suất vượt trội của nó trong các điều kiện thực tế. Dưới đây là chi tiết về kiến trúc và cách triển khai RetinaFace trong hệ thống của chúng tôi.
+            RetinaFace là một trong những mô hình phát hiện khuôn mặt tiên tiến nhất hiện nay, với khả năng phát hiện chính xác khuôn mặt trong nhiều điều kiện khác nhau. Dưới đây là chi tiết về kiến trúc và nguyên lý hoạt động của RetinaFace.
         </p>
 
-        <h3 class="subsection-title">1. Kiến trúc RetinaFace cho ứng dụng thương mại điện tử</h3>
+        <h3 class="subsection-title">1. Kiến trúc và nguyên lý hoạt động của RetinaFace</h3>
 
-        <h4 class="subsection-title">1.1 Backbone và Feature Pyramid tối ưu cho webcam</h4>
         <p>
-            Để đảm bảo hiệu suất thời gian thực trên các thiết bị của khách hàng, chúng tôi đã tối ưu hóa RetinaFace bằng cách sử dụng MobileNet làm backbone thay vì ResNet nặng hơn. Kiến trúc Feature Pyramid Network (FPN) được giữ nguyên để đảm bảo khả năng phát hiện khuôn mặt ở nhiều kích thước khác nhau - điều cần thiết khi khách hàng di chuyển gần hoặc xa webcam:
+            RetinaFace là một mô hình phát hiện khuôn mặt đa nhiệm vụ (multi-task), được thiết kế để thực hiện đồng thời nhiều tác vụ liên quan đến khuôn mặt: phát hiện vị trí khuôn mặt, xác định các điểm mốc trên khuôn mặt, và phân tích hình học 3D của khuôn mặt. Kiến trúc tổng thể của RetinaFace bao gồm ba thành phần chính:
         </p>
+
+        <ul>
+            <li><strong>Backbone Network:</strong> Mạng trích xuất đặc trưng cơ bản, có thể là ResNet, MobileNet hoặc các kiến trúc CNN khác.</li>
+            <li><strong>Feature Pyramid Network (FPN):</strong> Tạo ra các feature map đa tỷ lệ để phát hiện khuôn mặt ở nhiều kích thước khác nhau.</li>
+            <li><strong>Multi-task Branches:</strong> Các nhánh dự đoán chuyên biệt cho từng nhiệm vụ: phân loại khuôn mặt, xác định vùng khuôn mặt, dự đoán điểm mốc, và phân tích hình học 3D.</li>
+        </ul>
+
+        <h4 class="subsection-title">1.1 Kiến trúc Feature Pyramid Network (FPN)</h4>
+        <p>
+            Feature Pyramid Network (FPN) là một thành phần quan trọng trong kiến trúc RetinaFace, cho phép mô hình phát hiện khuôn mặt ở nhiều kích thước khác nhau. FPN giải quyết vấn đề cơ bản trong phát hiện đối tượng: làm thế nào để phát hiện chính xác các đối tượng có kích thước khác nhau trong cùng một hình ảnh.
+        </p>
+
+        <p>
+            FPN hoạt động bằng cách xây dựng một kim tự tháp đặc trưng đa tỷ lệ với các kết nối từ trên xuống (top-down) và các kết nối ngang (lateral connections). Quá trình này bao gồm hai đường đi chính:
+        </p>
+
+        <ul>
+            <li><strong>Đường đi từ dưới lên (bottom-up):</strong> Đây là quá trình trích xuất đặc trưng thông thường của mạng CNN, tạo ra các feature map với kích thước giảm dần và số kênh tăng dần.</li>
+            <li><strong>Đường đi từ trên xuống (top-down):</strong> Đường đi này bắt đầu từ lớp sâu nhất và dần dần khôi phục thông tin không gian bằng cách upsampling các feature map.</li>
+            <li><strong>Kết nối ngang (lateral connections):</strong> Kết nối các feature map cùng kích thước từ hai đường đi, giúp kết hợp thông tin ngữ cảnh (từ các lớp sâu) với thông tin vị trí chính xác (từ các lớp nông).</li>
+        </ul>
 
         <div class="table-responsive">
             <table class="table feature-table">
@@ -205,64 +298,72 @@
                     <tr>
                         <th>Feature Map</th>
                         <th>Kích thước đầu ra (cho ảnh 640×640)</th>
-                        <th>Ứng dụng trong thương mại điện tử</th>
+                        <th>Đặc điểm kỹ thuật</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>P2 (160×160×256)</td>
                         <td>Stride: 4, Anchors: 16-25px</td>
-                        <td>Phát hiện khuôn mặt khi khách hàng ở xa webcam</td>
+                        <td>Độ phân giải cao, phát hiện khuôn mặt nhỏ, giàu thông tin chi tiết, độ phức tạp tính toán cao</td>
                     </tr>
                     <tr>
                         <td>P3 (80×80×256)</td>
                         <td>Stride: 8, Anchors: 32-50px</td>
-                        <td>Phát hiện khuôn mặt ở khoảng cách trung bình</td>
+                        <td>Cân bằng giữa độ phân giải và thông tin ngữ cảnh, phát hiện khuôn mặt kích thước trung bình</td>
                     </tr>
                     <tr>
                         <td>P4 (40×40×256)</td>
                         <td>Stride: 16, Anchors: 64-101px</td>
-                        <td>Phát hiện khuôn mặt ở khoảng cách gần</td>
+                        <td>Thông tin ngữ cảnh phong phú, độ phân giải thấp hơn, phát hiện khuôn mặt lớn</td>
                     </tr>
                     <tr>
-                        <td>P5-P6</td>
-                        <td>Stride: 32-64, Anchors: 128-406px</td>
-                        <td>Phát hiện khi khách hàng rất gần webcam (hiếm gặp)</td>
+                        <td>P5 (20×20×256)</td>
+                        <td>Stride: 32, Anchors: 128-203px</td>
+                        <td>Thông tin ngữ cảnh toàn cục, độ phân giải thấp, phát hiện khuôn mặt rất lớn</td>
+                    </tr>
+                    <tr>
+                        <td>P6 (10×10×256)</td>
+                        <td>Stride: 64, Anchors: 256-406px</td>
+                        <td>Thông tin ngữ cảnh cực kỳ rộng, độ phân giải rất thấp, phát hiện khuôn mặt cực lớn</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <div class="feature-item">
-            <h5>Tối ưu hóa cho ứng dụng thương mại điện tử:</h5>
+            <h5>Cơ chế hoạt động của FPN:</h5>
             <ul>
-                <li>Tập trung 75% anchors trên P2-P3 để xử lý khoảng cách phổ biến khi khách hàng sử dụng máy tính.</li>
-                <li>Giảm độ phức tạp tính toán bằng cách sử dụng MobileNet để đảm bảo trải nghiệm mượt mà trên thiết bị của khách hàng.</li>
-                <li>Tối ưu hóa thời gian xử lý để giảm độ trễ trong tương tác với chatbot.</li>
+                <li><strong>Trích xuất đặc trưng đa tỷ lệ:</strong> Mỗi tầng của FPN chịu trách nhiệm phát hiện khuôn mặt ở một khoảng kích thước nhất định, giúp mô hình có khả năng phát hiện khuôn mặt ở nhiều kích thước khác nhau.</li>
+                <li><strong>Kết hợp thông tin ngữ cảnh và chi tiết:</strong> Các kết nối ngang giúp kết hợp thông tin ngữ cảnh từ các lớp sâu với thông tin chi tiết từ các lớp nông, cải thiện độ chính xác của việc phát hiện.</li>
+                <li><strong>Chia sẻ tham số:</strong> Các lớp dự đoán chia sẻ tham số giữa các tầng của FPN, giúp giảm số lượng tham số và tăng khả năng tổng quát hóa của mô hình.</li>
+                <li><strong>Cơ chế Anchor:</strong> Mỗi vị trí trên feature map được gắn với nhiều anchor box có tỷ lệ và kích thước khác nhau, tăng khả năng phát hiện khuôn mặt ở nhiều hình dạng và tư thế.</li>
             </ul>
         </div>
 
-        <h4 class="subsection-title">1.2 Các nhánh dự đoán đa nhiệm vụ cho nhận diện khách hàng</h4>
+        <h4 class="subsection-title">1.2 Các nhánh dự đoán đa nhiệm vụ (Multi-task Branches)</h4>
         <p>
-            Mô hình RetinaFace trong hệ thống chatbot bán hàng của chúng tôi thực hiện 4 nhánh dự đoán song song, mỗi nhánh đóng vai trò quan trọng trong việc nhận diện chính xác khách hàng:
+            Một trong những đặc điểm nổi bật của RetinaFace là kiến trúc đa nhiệm vụ, cho phép mô hình thực hiện đồng thời nhiều tác vụ liên quan đến khuôn mặt. Mô hình RetinaFace thực hiện 4 nhánh dự đoán song song:
         </p>
 
         <div class="row">
             <div class="col-md-6">
                 <div class="feature-item">
-                    <h5>1. Phân loại khuôn mặt:</h5>
+                    <h5>1. Phân loại khuôn mặt (Face Classification):</h5>
                     <ul>
-                        <li>Xác định có phải khuôn mặt hay không - loại bỏ các vùng không phải khuôn mặt.</li>
-                        <li>Đảm bảo chatbot chỉ tương tác khi phát hiện được khuôn mặt khách hàng.</li>
+                        <li>Xác định xem một vùng ảnh có chứa khuôn mặt hay không.</li>
+                        <li>Sử dụng hàm kích hoạt sigmoid để dự đoán xác suất vùng ảnh chứa khuôn mặt.</li>
+                        <li>Loại bỏ các vùng không phải khuôn mặt để giảm thiểu false positive.</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="feature-item">
-                    <h5>2. Xác định vùng khuôn mặt:</h5>
+                    <h5>2. Xác định vùng khuôn mặt (Bounding Box Regression):</h5>
                     <ul>
-                        <li>Dự đoán chính xác vị trí và kích thước khuôn mặt (tx, ty, tw, th).</li>
-                        <li>Cắt chính xác vùng khuôn mặt để chuyển sang bước nhận dạng.</li>
+                        <li>Dự đoán chính xác vị trí và kích thước khuôn mặt thông qua 4 tham số: tx, ty (tọa độ tâm), tw, th (chiều rộng và chiều cao).</li>
+                        <li>Sử dụng kỹ thuật smooth L1 loss để tối ưu hóa độ chính xác của bounding box.</li>
+                        <li>Hỗ trợ phát hiện khuôn mặt ở nhiều tỷ lệ và góc độ khác nhau.</li>
                     </ul>
                 </div>
             </div>
@@ -271,45 +372,62 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="feature-item">
-                    <h5>3. Xác định điểm mốc khuôn mặt:</h5>
+                    <h5>3. Xác định điểm mốc khuôn mặt (Facial Landmark Regression):</h5>
                     <ul>
-                        <li>Dự đoán 5 điểm mốc: 2 mắt, mũi, 2 khóe miệng.</li>
-                        <li>Cho phép căn chỉnh khuôn mặt trước khi nhận dạng, cải thiện độ chính xác.</li>
-                        <li>Hỗ trợ phát hiện góc nghiêng của khuôn mặt khách hàng.</li>
+                        <li>Dự đoán chính xác 5 điểm mốc quan trọng trên khuôn mặt: 2 mắt, mũi, 2 khóe miệng.</li>
+                        <li>Sử dụng kỹ thuật regression để xác định tọa độ chính xác của từng điểm mốc.</li>
+                        <li>Các điểm mốc này cung cấp thông tin về hướng và góc nghiêng của khuôn mặt.</li>
+                        <li>Đóng vai trò quan trọng trong việc căn chỉnh khuôn mặt (face alignment) trước khi nhận dạng.</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="feature-item">
-                    <h5>4. Phân tích hình học 3D (tùy chọn):</h5>
+                    <h5>4. Phân tích hình học 3D (Dense 3D Face Regression):</h5>
                     <ul>
-                        <li>Dự đoán thông tin 3D của khuôn mặt để cải thiện khả năng nhận diện trong điều kiện ánh sáng kém.</li>
-                        <li>Hỗ trợ phát hiện khuôn mặt thật (anti-spoofing) - ngăn chặn giả mạo bằng ảnh.</li>
-                        <li>Có thể tắt trên thiết bị yếu để tối ưu hiệu suất.</li>
+                        <li>Dự đoán mô hình 3D của khuôn mặt thông qua kỹ thuật mesh regression.</li>
+                        <li>Ước tính các tham số hình học 3D như góc quay (pitch, yaw, roll) và hình dạng khuôn mặt.</li>
+                        <li>Cải thiện khả năng nhận diện trong điều kiện ánh sáng kém hoặc khuôn mặt bị che khuất một phần.</li>
+                        <li>Hỗ trợ phát hiện khuôn mặt thật (anti-spoofing) - phân biệt giữa khuôn mặt thật và ảnh/video giả mạo.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
         <div class="report-note">
-            <p class="mb-0">Tất cả các nhánh sử dụng cùng một feature extractor chia sẻ, giúp tối ưu hóa hiệu suất tính toán - yếu tố quan trọng để đảm bảo trải nghiệm mượt mà cho khách hàng khi tương tác với chatbot bán hàng.</p>
+            <p class="mb-0">Tất cả các nhánh dự đoán sử dụng cùng một feature extractor chia sẻ, giúp tối ưu hóa hiệu suất tính toán. Mô hình được huấn luyện với hàm mất mát tổng hợp (multi-task loss) kết hợp các mất mát của từng nhiệm vụ:</p>
         </div>
 
-        <h3 class="subsection-title">2. Quy trình xử lý trong thời gian thực</h3>
+        <div class="report-formula">
+            $$\mathcal{L}_{total} = \mathcal{L}_{cls} + \lambda_1 \cdot \mathcal{L}_{box} + \lambda_2 \cdot \mathcal{L}_{landmark} + \lambda_3 \cdot \mathcal{L}_{dense}$$
+        </div>
 
         <p>
-            Khi khách hàng tương tác với chatbot bán hàng thông qua webcam, hệ thống thực hiện quy trình phát hiện khuôn mặt theo các bước sau:
+            Trong đó:
+        </p>
+        <ul>
+            <li>$\mathcal{L}_{cls}$ là mất mát phân loại khuôn mặt (focal loss)</li>
+            <li>$\mathcal{L}_{box}$ là mất mát hồi quy bounding box (smooth L1 loss)</li>
+            <li>$\mathcal{L}_{landmark}$ là mất mát hồi quy điểm mốc (smooth L1 loss)</li>
+            <li>$\mathcal{L}_{dense}$ là mất mát hồi quy hình học 3D</li>
+            <li>$\lambda_1, \lambda_2, \lambda_3$ là các hệ số cân bằng giữa các nhiệm vụ</li>
+        </ul>
+
+        <h3 class="subsection-title">2. Áp dụng RetinaFace trong nhận diện khách hàng</h3>
+
+        <p>
+            Sau khi hiểu rõ về kiến trúc và nguyên lý hoạt động của RetinaFace, chúng ta sẽ xem xét cách áp dụng mô hình này trong hệ thống nhận diện khách hàng. Khi khách hàng tương tác với chatbot bán hàng thông qua webcam, hệ thống thực hiện quy trình phát hiện khuôn mặt theo các bước sau:
         </p>
 
         <ol>
-            <li><strong>Tiền xử lý hình ảnh:</strong> Chuẩn hóa kích thước (640×640px), điều chỉnh độ sáng và độ tương phản để thích ứng với điều kiện ánh sáng khác nhau.</li>
+            <li><strong>Tiền xử lý hình ảnh:</strong> Chuẩn hóa kích thước (640×640px).</li>
             <li><strong>Trích xuất đặc trưng:</strong> Hình ảnh đi qua MobileNet và FPN để tạo ra các feature map đa tỷ lệ.</li>
-            <li><strong>Phát hiện và lọc:</strong> Áp dụng ngưỡng tin cậy (confidence threshold) 0.8 để loại bỏ các phát hiện không chắc chắn, đảm bảo độ chính xác.</li>
-            <li><strong>Xử lý chồng chéo:</strong> Áp dụng Non-Maximum Suppression với ngưỡng IoU 0.4 để loại bỏ các box chồng chéo.</li>
+            <li><strong>Phát hiện và lọc:</strong> Áp dụng ngưỡng tin cậy (confidence threshold) 0.5 để loại bỏ các phát hiện không chắc chắn, đảm bảo độ chính xác.</li>
+            <li><strong>Xử lý chồng chéo:</strong> Áp dụng Non-Maximum Suppression với ngưỡng IoU 0.3 để loại bỏ các box chồng chéo.</li>
             <li><strong>Căn chỉnh khuôn mặt:</strong> Sử dụng 5 điểm mốc để căn chỉnh khuôn mặt về vị trí chuẩn trước khi chuyển sang bước nhận dạng.</li>
         </ol>
 
-        <h4 class="subsection-title">2.1 Tối ưu hóa hiệu suất cho ứng dụng thương mại điện tử</h4>
+        <h4 class="subsection-title">2.1 Tối ưu hóa hiệu suất cho ứng dụng nhận diện khách hàng</h4>
 
         <p>
             Để đảm bảo trải nghiệm mượt mà cho khách hàng khi tương tác với chatbot bán hàng, chúng tôi đã thực hiện các tối ưu hóa sau:
@@ -321,8 +439,9 @@
                     <h5>Tối ưu hóa tốc độ:</h5>
                     <ul>
                         <li>Giảm tần suất phát hiện xuống 10 khung hình/giây - đủ cho tương tác nhưng giảm tải CPU/GPU.</li>
-                        <li>Sử dụng phiên bản MobileNet nhẹ hơn cho thiết bị có cấu hình thấp.</li>
-                        <li>Tắt nhánh Dense 3D Mesh Regression trên thiết bị yếu.</li>
+                        <li>Sử dụng MobileNet làm backbone thay vì ResNet để giảm độ phức tạp tính toán.</li>
+                        <li>Tắt nhánh Dense 3D Mesh Regression trên thiết bị yếu để tăng tốc độ xử lý.</li>
+                        <li>Áp dụng kỹ thuật batch processing để tận dụng tối đa khả năng tính toán song song.</li>
                     </ul>
                 </div>
             </div>
@@ -332,57 +451,244 @@
                     <ul>
                         <li>Áp dụng kỹ thuật tăng cường dữ liệu (data augmentation) để cải thiện khả năng thích ứng với điều kiện ánh sáng khác nhau.</li>
                         <li>Sử dụng bộ nhớ đệm để theo dõi vị trí khuôn mặt qua các khung hình, giảm thiểu hiện tượng nhấp nháy.</li>
-                        <li>Tích hợp cơ chế phát hiện chất lượng khuôn mặt để thông báo cho khách hàng khi điều kiện không lý tưởng.</li>
+                        <li>Điều chỉnh ngưỡng tin cậy (confidence threshold) để cân bằng giữa độ chính xác và khả năng phát hiện.</li>
+                        <li>Tích hợp cơ chế phát hiện chất lượng khuôn mặt để thông báo khi điều kiện không lý tưởng.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <div class="report-formula">
-            $$\mathcal{L}_{total} = \mathcal{L}_{cls} + \lambda_1 \cdot \mathcal{L}_{box} + \lambda_2 \cdot \mathcal{L}_{landmark} + \lambda_3 \cdot \mathcal{L}_{dense}$$
-        </div>
-
         <p>
-            Trong đó các hệ số $\lambda$ được điều chỉnh để ưu tiên độ chính xác của box và landmark - hai yếu tố quan trọng nhất cho việc nhận diện khách hàng trong hệ thống chatbot bán hàng.
+            Những tối ưu hóa này giúp RetinaFace hoạt động hiệu quả trong môi trường thực tế của hệ thống nhận diện khách hàng, đảm bảo cân bằng giữa độ chính xác và tốc độ xử lý - hai yếu tố quan trọng để tạo trải nghiệm người dùng tốt.
         </p>
     </section>
 
     <!-- Phần đánh giá hiệu suất trong hệ thống chatbot bán hàng -->
     <section class="report-section" id="model-comparison-ecommerce">
-        <h2 class="section-title">Đánh giá hiệu suất các mô hình phát hiện khuôn mặt trong hệ thống chatbot bán hàng</h2>
+        <h2 class="section-title">Đánh giá hiệu suất các mô hình phát hiện khuôn mặt</h2>
         <p>
-            Để xác định mô hình phát hiện khuôn mặt tối ưu cho hệ thống chatbot bán hàng, chúng tôi đã tiến hành đánh giá hiệu suất của RetinaFace, MTCNN, YOLO và Haar Cascade trong môi trường thương mại điện tử thực tế. Đánh giá này tập trung vào khả năng phát hiện chính xác khuôn mặt khách hàng trong các điều kiện sử dụng thực tế của hệ thống chatbot bán hàng.
+            Để xác định mô hình phát hiện khuôn mặt tối ưu cho hệ thống nhận diện khách hàng, chúng tôi đã tiến hành đánh giá hiệu suất của bốn mô hình phổ biến: RetinaFace, MTCNN, YOLO và Haar Cascade. Đánh giá này tập trung vào ba chỉ số kỹ thuật quan trọng: độ chính xác nhận diện (IoU), khoảng cách tâm (Center Distance) và thời gian xử lý (Processing Time).
         </p>
 
-        <h3 class="subsection-title">Các chỉ số đánh giá cho ứng dụng thương mại điện tử</h3>
+        <h3 class="subsection-title">Các chỉ số đánh giá hiệu suất</h3>
         <p>
-            Chúng tôi đã xây dựng bộ chỉ số đánh giá toàn diện, tập trung vào các yếu tố quan trọng đối với trải nghiệm khách hàng khi sử dụng chatbot bán hàng:
+            Chúng tôi đã xây dựng bộ chỉ số đánh giá toàn diện, tập trung vào ba yếu tố quan trọng đối với hiệu suất phát hiện khuôn mặt: độ chính xác nhận diện (IoU), khoảng cách tâm và thời gian xử lý. Các chỉ số này được đánh giá thông qua biểu đồ so sánh giữa các mô hình.
         </p>
+
+        <h4 class="subsection-title">1. Độ chính xác nhận diện (IoU)</h4>
 
         <div class="row">
-            <div class="col-md-4">
-                <div class="feature-item">
-                    <h5>Độ chính xác nhận diện (IoU)</h5>
-                    <p>Đo lường khả năng xác định chính xác vị trí khuôn mặt khách hàng - yếu tố quan trọng để đảm bảo nhận diện đúng khách hàng và cá nhân hóa trải nghiệm mua sắm.</p>
+            <div class="col-md-7">
+                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                    <!-- Biểu đồ IoU -->
+                    <canvas id="iouChart"></canvas>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-5">
                 <div class="feature-item">
-                    <h5>Thời gian phản hồi</h5>
-                    <p>Đo lường thời gian từ khi nhận hình ảnh đến khi phát hiện được khuôn mặt - yếu tố quyết định đến trải nghiệm tương tác thời gian thực của khách hàng với chatbot bán hàng.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-item">
-                    <h5>Khả năng thích ứng</h5>
-                    <p>Đánh giá hiệu suất trong các điều kiện thực tế khác nhau: ánh sáng yếu, góc nghiêng, khoảng cách thay đổi - các tình huống thường gặp khi khách hàng sử dụng webcam.</p>
+                    <h5>Phân tích IoU (Intersection over Union)</h5>
+                    <p>IoU đo lường mức độ chồng lấp giữa bounding box dự đoán và bounding box thực tế của khuôn mặt. Giá trị IoU càng cao, độ chính xác càng tốt.</p>
+                    <ul>
+                        <li><strong>RetinaFace:</strong> Đạt IoU trung bình cao nhất (0.8483), thể hiện khả năng xác định chính xác vị trí khuôn mặt vượt trội.</li>
+                        <li><strong>MTCNN:</strong> Xếp thứ hai với IoU trung bình 0.8203, hiệu suất ổn định ở nhiều điều kiện khác nhau.</li>
+                        <li><strong>YOLO:</strong> Đạt IoU trung bình 0.6637, hiệu suất khá với khuôn mặt kích thước lớn.</li>
+                        <li><strong>Haar Cascade:</strong> Có IoU thấp nhất (0.6629), thường gặp khó khăn với khuôn mặt nghiêng hoặc ánh sáng kém.</li>
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <h3 class="subsection-title">Kết quả đánh giá trong môi trường thương mại điện tử</h3>
+        <h4 class="subsection-title">2. Khoảng cách tâm (Center Distance)</h4>
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                    <!-- Biểu đồ khoảng cách tâm -->
+                    <canvas id="centerDistChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="feature-item">
+                    <h5>Phân tích khoảng cách tâm</h5>
+                    <p>Khoảng cách tâm đo lường khoảng cách Euclidean giữa tâm của bounding box dự đoán và tâm của bounding box thực tế. Giá trị càng thấp càng tốt.</p>
+                    <ul>
+                        <li><strong>RetinaFace:</strong> Khoảng cách tâm trung bình thấp nhất (20.58px), cho thấy khả năng định vị chính xác tâm khuôn mặt.</li>
+                        <li><strong>MTCNN:</strong> Khoảng cách tâm trung bình 23.48px, hiệu suất tốt với khuôn mặt nhìn thẳng.</li>
+                        <li><strong>Haar Cascade:</strong> Khoảng cách tâm trung bình 38.01px, thường bị lệch tâm khi khuôn mặt nghiêng.</li>
+                        <li><strong>YOLO:</strong> Khoảng cách tâm lớn nhất (41.66px), hiệu suất kém hơn trong việc định vị chính xác tâm khuôn mặt.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="subsection-title">3. Thời gian xử lý (Processing Time)</h4>
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                    <!-- Biểu đồ thời gian xử lý -->
+                    <canvas id="processingTimeChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="feature-item">
+                    <h5>Phân tích thời gian xử lý</h5>
+                    <p>Thời gian xử lý đo lường thời gian từ khi nhận hình ảnh đến khi phát hiện được khuôn mặt. Giá trị càng thấp càng tốt cho tương tác thời gian thực.</p>
+                    <ul>
+                        <li><strong>YOLO:</strong> Thời gian xử lý nhanh nhất (183.3ms), cân bằng tốt giữa tốc độ và độ chính xác.</li>
+                        <li><strong>RetinaFace:</strong> Thời gian xử lý trung bình (425.5ms), đòi hỏi phần cứng khá để đảm bảo tương tác mượt mà.</li>
+                        <li><strong>Haar Cascade:</strong> Thời gian xử lý khá chậm (460.0ms), mặc dù thường được coi là thuật toán nhẹ.</li>
+                        <li><strong>MTCNN:</strong> Thời gian xử lý lâu nhất (795.8ms), đòi hỏi phần cứng mạnh và ảnh hưởng đến trải nghiệm thời gian thực.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- JavaScript cho các biểu đồ -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Dữ liệu cho biểu đồ IoU
+                var iouCtx = document.getElementById('iouChart').getContext('2d');
+                var iouChart = new Chart(iouCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['RetinaFace', 'YOLO', 'MTCNN', 'Haar Cascade'],
+                        datasets: [{
+                            label: 'IoU trung bình',
+                            data: [0.8483, 0.6637, 0.8203, 0.6629],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(255, 99, 132, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(255, 99, 132, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 0.6,
+                                max: 0.9,
+                                title: {
+                                    display: true,
+                                    text: 'IoU (cao hơn = tốt hơn)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'So sánh IoU trung bình giữa các mô hình'
+                            }
+                        }
+                    }
+                });
+
+                // Dữ liệu cho biểu đồ khoảng cách tâm
+                var centerDistCtx = document.getElementById('centerDistChart').getContext('2d');
+                var centerDistChart = new Chart(centerDistCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['RetinaFace', 'YOLO', 'MTCNN', 'Haar Cascade'],
+                        datasets: [{
+                            label: 'Khoảng cách tâm trung bình (pixel)',
+                            data: [20.58, 41.66, 23.48, 38.01],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(255, 99, 132, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(255, 99, 132, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Pixel (thấp hơn = tốt hơn)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'So sánh khoảng cách tâm trung bình giữa các mô hình'
+                            }
+                        }
+                    }
+                });
+
+                // Dữ liệu cho biểu đồ thời gian xử lý
+                var timeCtx = document.getElementById('processingTimeChart').getContext('2d');
+                var timeChart = new Chart(timeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['RetinaFace', 'MTCNN', 'YOLO', 'Haar Cascade'],
+                        datasets: [{
+                            label: 'Thời gian xử lý trung bình (ms)',
+                            data: [425.5, 795.8, 183.3, 460.0],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(255, 99, 132, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(255, 99, 132, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Milliseconds (thấp hơn = tốt hơn)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'So sánh thời gian xử lý trung bình giữa các mô hình'
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+
+        <h3 class="subsection-title">Kết quả đánh giá tổng hợp</h3>
         <p>
-            Chúng tôi đã tiến hành thử nghiệm với 500 khách hàng thực tế sử dụng hệ thống chatbot bán hàng trong các điều kiện khác nhau. Kết quả được tóm tắt trong bảng dưới đây:
+            Chúng tôi đã tiến hành thử nghiệm với bộ dữ liệu gồm khoảng 300 hình ảnh khuôn mặt. Kết quả đánh giá tổng hợp được tóm tắt trong bảng dưới đây:
         </p>
 
         <div class="table-responsive">
@@ -391,112 +697,140 @@
                     <tr>
                         <th rowspan="2">Mô hình</th>
                         <th colspan="3">Hiệu suất kỹ thuật</th>
-                        <th colspan="2">Tỷ lệ lỗi trong thực tế</th>
-                        <th colspan="2">Đánh giá cho thương mại điện tử</th>
+                        <th colspan="3">Tỷ lệ lỗi trong thực tế</th>
+                        <th colspan="2">Đánh giá cho ứng dụng</th>
                     </tr>
                     <tr>
                         <th>IoU trung bình</th>
                         <th>Thời gian xử lý (ms)</th>
-                        <th>Sử dụng CPU</th>
-                        <th>Không nhận diện được</th>
-                        <th>Nhận diện sai</th>
-                        <th>Ưu điểm cho chatbot</th>
-                        <th>Nhược điểm cho chatbot</th>
+                        <th>Khoảng cách tâm (px)</th>
+                        <th>IoU = 0</th>
+                        <th>0 < IoU < 0.5</th>
+                        <th>Tổng lỗi</th>
+                        <th>Ưu điểm</th>
+                        <th>Nhược điểm</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><strong>RetinaFace</strong></td>
-                        <td>0.89</td>
-                        <td>180</td>
-                        <td>Cao</td>
-                        <td>3%</td>
-                        <td>5%</td>
-                        <td>Nhận diện chính xác trong điều kiện ánh sáng kém, tăng tỷ lệ nhận diện đúng khách hàng</td>
-                        <td>Có thể gây độ trễ trên thiết bị yếu, ảnh hưởng đến trải nghiệm tương tác</td>
+                        <td>0.8483</td>
+                        <td>425.5</td>
+                        <td>20.58</td>
+                        <td>0.3%</td>
+                        <td>0.0%</td>
+                        <td>0.3%</td>
+                        <td>Độ chính xác cao nhất, khoảng cách tâm thấp nhất, phù hợp cho ứng dụng yêu cầu độ chính xác cao</td>
+                        <td>Thời gian xử lý khá lâu, đòi hỏi phần cứng mạnh để đảm bảo tương tác mượt mà</td>
                     </tr>
                     <tr>
                         <td><strong>MTCNN</strong></td>
-                        <td>0.82</td>
-                        <td>120</td>
-                        <td>Trung bình</td>
-                        <td>5%</td>
-                        <td>8%</td>
-                        <td>Cân bằng tốt giữa tốc độ và độ chính xác, phù hợp cho đa số khách hàng</td>
-                        <td>Hiệu suất giảm khi khách hàng nghiêng mặt nhiều</td>
+                        <td>0.8203</td>
+                        <td>795.8</td>
+                        <td>23.48</td>
+                        <td>0.3%</td>
+                        <td>0.0%</td>
+                        <td>0.3%</td>
+                        <td>Độ chính xác cao thứ hai, khoảng cách tâm tốt, ổn định trong nhiều điều kiện ánh sáng</td>
+                        <td>Thời gian xử lý lâu nhất, không phù hợp cho ứng dụng thời gian thực</td>
                     </tr>
                     <tr>
                         <td><strong>YOLO</strong></td>
-                        <td>0.85</td>
-                        <td>90</td>
-                        <td>Trung bình-Thấp</td>
-                        <td>4%</td>
-                        <td>7%</td>
-                        <td>Tương tác mượt mà, phát hiện nhanh nhiều khách hàng cùng lúc</td>
-                        <td>Độ chính xác thấp hơn với khuôn mặt nhỏ, ảnh hưởng đến khách hàng sử dụng thiết bị di động</td>
+                        <td>0.6637</td>
+                        <td>183.3</td>
+                        <td>41.66</td>
+                        <td>0.3%</td>
+                        <td>6.9%</td>
+                        <td>7.2%</td>
+                        <td>Thời gian xử lý nhanh nhất, phù hợp cho ứng dụng thời gian thực và thiết bị có tài nguyên hạn chế</td>
+                        <td>Độ chính xác IoU thấp, khoảng cách tâm lớn, tỷ lệ lỗi cao với khuôn mặt nhỏ</td>
                     </tr>
                     <tr>
                         <td><strong>Haar Cascade</strong></td>
-                        <td>0.75</td>
-                        <td>45</td>
-                        <td>Thấp</td>
-                        <td>8%</td>
-                        <td>12%</td>
-                        <td>Hoạt động tốt trên thiết bị cấu hình thấp, đảm bảo khả năng tiếp cận rộng rãi</td>
-                        <td>Tỷ lệ lỗi cao trong điều kiện ánh sáng kém, gây trải nghiệm không tốt cho khách hàng</td>
+                        <td>0.6629</td>
+                        <td>460.0</td>
+                        <td>38.01</td>
+                        <td>3.1%</td>
+                        <td>1.7%</td>
+                        <td>4.8%</td>
+                        <td>Thuật toán đơn giản, dễ triển khai, yêu cầu tài nguyên thấp</td>
+                        <td>Độ chính xác thấp nhất, thời gian xử lý khá chậm, không ổn định trong điều kiện ánh sáng kém</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <h3 class="subsection-title">Phân tích kết quả cho ứng dụng thương mại điện tử</h3>
+        <h3 class="subsection-title">Phân tích kết quả và ứng dụng thực tế</h3>
         <p>
-            Dựa trên kết quả đánh giá, chúng tôi đã phân tích tác động của từng mô hình đến trải nghiệm khách hàng và hiệu quả bán hàng:
+            Dựa trên kết quả đánh giá từ cả biểu đồ và bảng dữ liệu, chúng tôi đã phân tích tác động của từng mô hình đến trải nghiệm người dùng và hiệu quả của hệ thống nhận diện khách hàng:
         </p>
 
         <div class="row">
             <div class="col-md-6">
                 <div class="feature-item">
-                    <h5>Tác động đến trải nghiệm khách hàng:</h5>
+                    <h5>Phân tích hiệu suất tổng thể:</h5>
                     <ul>
-                        <li><strong>RetinaFace:</strong> Cung cấp trải nghiệm nhận diện chính xác nhất (92% khách hàng được nhận diện đúng), nhưng có thể gây độ trễ trên thiết bị yếu.</li>
-                        <li><strong>MTCNN:</strong> Mang lại trải nghiệm cân bằng với 87% khách hàng được nhận diện đúng và phản hồi nhanh.</li>
-                        <li><strong>YOLO:</strong> Tạo cảm giác phản hồi nhanh nhất, nhưng có thể gây nhầm lẫn trong một số trường hợp.</li>
-                        <li><strong>Haar Cascade:</strong> Hoạt động tốt trên thiết bị yếu nhưng tỷ lệ lỗi cao (20%) ảnh hưởng đến sự hài lòng của khách hàng.</li>
+                        <li><strong>RetinaFace:</strong> Vượt trội về độ chính xác với IoU cao nhất (0.8483) và khoảng cách tâm thấp nhất (20.58px), với thời gian xử lý trung bình (425.5ms).</li>
+                        <li><strong>MTCNN:</strong> Hiệu suất tốt về độ chính xác với IoU cao thứ hai (0.8203) và khoảng cách tâm tốt (23.48px), nhưng thời gian xử lý lâu nhất (795.8ms).</li>
+                        <li><strong>YOLO:</strong> Tốc độ xử lý nhanh nhất (183.3ms) nhưng độ chính xác IoU thấp (0.6637) và khoảng cách tâm lớn nhất (41.66px).</li>
+                        <li><strong>Haar Cascade:</strong> Hiệu suất kém nhất về độ chính xác (IoU 0.6629) với thời gian xử lý khá chậm (460.0ms).</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="feature-item">
-                    <h5>Tác động đến hiệu quả bán hàng:</h5>
+                    <h5>Phân tích điều kiện sử dụng tối ưu:</h5>
                     <ul>
-                        <li><strong>RetinaFace:</strong> Tăng 23% tỷ lệ chuyển đổi nhờ khả năng cá nhân hóa chính xác đề xuất sản phẩm dựa trên nhận diện khách hàng.</li>
-                        <li><strong>MTCNN:</strong> Tăng 18% tỷ lệ chuyển đổi với thời gian tương tác trung bình dài hơn 15% so với các mô hình khác.</li>
-                        <li><strong>YOLO:</strong> Tăng 15% tỷ lệ chuyển đổi với thời gian phản hồi nhanh, phù hợp cho khách hàng ưu tiên tốc độ.</li>
-                        <li><strong>Haar Cascade:</strong> Tăng 8% tỷ lệ chuyển đổi, chủ yếu trên các thiết bị cấu hình thấp không thể chạy các mô hình phức tạp hơn.</li>
+                        <li><strong>RetinaFace:</strong> Phù hợp nhất cho các ứng dụng yêu cầu độ chính xác cao, như hệ thống an ninh hoặc xác thực sinh trắc học, khi độ chính xác quan trọng hơn tốc độ.</li>
+                        <li><strong>YOLO:</strong> Lựa chọn tốt nhất cho các ứng dụng cần cân bằng giữa độ chính xác và tốc độ, như hệ thống giám sát thời gian thực hoặc ứng dụng di động cao cấp.</li>
+                        <li><strong>MTCNN:</strong> Phù hợp cho các ứng dụng đa nền tảng cần độ ổn định cao, hoạt động tốt trên nhiều loại thiết bị và điều kiện ánh sáng khác nhau.</li>
+                        <li><strong>Haar Cascade:</strong> Lý tưởng cho các thiết bị có tài nguyên hạn chế hoặc ứng dụng ưu tiên tốc độ phản hồi hơn độ chính xác cao.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <h3 class="subsection-title">Giải pháp tối ưu cho hệ thống chatbot bán hàng</h3>
+        <h3 class="subsection-title">Đề xuất giải pháp tối ưu cho hệ thống nhận diện khách hàng</h3>
         <p>
-            Dựa trên kết quả đánh giá toàn diện, chúng tôi đề xuất giải pháp kết hợp để tối ưu hóa trải nghiệm khách hàng và hiệu quả bán hàng:
+            Dựa trên kết quả đánh giá toàn diện từ các biểu đồ và bảng dữ liệu, chúng tôi đề xuất giải pháp thích ứng để tối ưu hóa hiệu suất hệ thống nhận diện khách hàng:
         </p>
 
         <div class="report-note">
             <p>
-                <strong>Giải pháp thích ứng theo thiết bị:</strong> Hệ thống chatbot bán hàng của chúng tôi sẽ tự động lựa chọn mô hình phát hiện khuôn mặt phù hợp dựa trên cấu hình thiết bị của khách hàng:
+                <strong>Giải pháp thích ứng đa mô hình:</strong> Hệ thống nhận diện khách hàng có thể được thiết kế để tự động lựa chọn mô hình phát hiện khuôn mặt phù hợp dựa trên ba yếu tố chính:
             </p>
             <ul>
-                <li><strong>Thiết bị mạnh (>8GB RAM, GPU):</strong> Sử dụng RetinaFace để đạt độ chính xác cao nhất.</li>
-                <li><strong>Thiết bị trung bình (4-8GB RAM):</strong> Sử dụng MTCNN để cân bằng giữa tốc độ và độ chính xác.</li>
-                <li><strong>Thiết bị yếu (<4GB RAM):</strong> Sử dụng YOLO hoặc Haar Cascade để đảm bảo tốc độ phản hồi.</li>
+                <li><strong>Cấu hình thiết bị:</strong> Tự động phát hiện tài nguyên phần cứng và chọn mô hình phù hợp.</li>
+                <li><strong>Yêu cầu ứng dụng:</strong> Cân nhắc giữa độ chính xác và tốc độ phản hồi tùy theo ngữ cảnh sử dụng.</li>
+                <li><strong>Điều kiện môi trường:</strong> Thích ứng với điều kiện ánh sáng và góc nhìn khác nhau.</li>
             </ul>
         </div>
 
+        <div class="row">
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <h5>Chiến lược phân phối mô hình đề xuất:</h5>
+                    <ul>
+                        <li><strong>Thiết bị mạnh (>8GB RAM, GPU):</strong> Sử dụng RetinaFace để tận dụng độ chính xác cao nhất (IoU 0.8483).</li>
+                        <li><strong>Thiết bị trung bình (4-8GB RAM):</strong> Sử dụng YOLO (tốc độ) hoặc MTCNN (độ chính xác) tùy theo ưu tiên của ứng dụng.</li>
+                        <li><strong>Thiết bị yếu (<4GB RAM):</strong> Sử dụng Haar Cascade hoặc phiên bản nhẹ của YOLO để đảm bảo khả năng phản hồi.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <h5>Lợi ích dự kiến:</h5>
+                    <ul>
+                        <li><strong>Cân bằng tài nguyên:</strong> Phân bổ tài nguyên tính toán hiệu quả dựa trên khả năng của thiết bị.</li>
+                        <li><strong>Tối ưu hóa trải nghiệm người dùng:</strong> Đảm bảo thời gian phản hồi phù hợp trên mọi thiết bị.</li>
+                        <li><strong>Linh hoạt trong triển khai:</strong> Dễ dàng điều chỉnh theo yêu cầu cụ thể của từng ứng dụng.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <p>
-            Giải pháp này đã được triển khai và thử nghiệm với 1,000 khách hàng, cho thấy cải thiện đáng kể về trải nghiệm người dùng (tăng 27% điểm hài lòng) và hiệu quả bán hàng (tăng 31% tỷ lệ chuyển đổi) so với việc sử dụng một mô hình duy nhất cho tất cả khách hàng.
+            Giải pháp thích ứng đa mô hình này cần được thử nghiệm và đánh giá trong môi trường thực tế trước khi triển khai rộng rãi. Việc kết hợp các mô hình khác nhau có tiềm năng tối ưu hóa cả độ chính xác và hiệu suất, đặc biệt trong các ứng dụng có nhiều loại thiết bị người dùng khác nhau.
         </p>
     </section>
 
@@ -511,25 +845,59 @@
         <h3 class="subsection-title">1. Kiến trúc và nguyên lý hoạt động của ArcFace</h3>
 
         <p>
-            ArcFace (Additive Angular Margin Loss for Deep Face Recognition) là một phương pháp nhận diện khuôn mặt dựa trên mạng nơ-ron tích chập sâu (CNN) với một hàm mất mát đặc biệt được thiết kế để tối ưu hóa khả năng phân biệt giữa các khuôn mặt khác nhau.
+            ArcFace (Additive Angular Margin Loss for Deep Face Recognition) là một phương pháp nhận diện khuôn mặt tiên tiến được giới thiệu bởi Deng và cộng sự vào năm 2019. Phương pháp này đã đạt được hiệu suất vượt trội trong nhiều bài toán nhận diện khuôn mặt và trở thành một trong những tiêu chuẩn hàng đầu trong lĩnh vực này.
         </p>
 
         <h4 class="subsection-title">1.1 Kiến trúc mạng</h4>
 
+        <div class="row">
+            <div class="col-md-7">
+                <p>
+                    ArcFace không phải là một kiến trúc mạng cụ thể mà là một phương pháp huấn luyện với hàm mất mát đặc biệt. Kiến trúc mạng của ArcFace thường bao gồm hai phần chính: mạng xương sống (backbone network) và lớp nhúng đặc trưng (feature embedding layer).
+                </p>
+                <p>
+                    <strong>Mạng xương sống (Backbone Network):</strong> ArcFace thường sử dụng các kiến trúc mạng CNN hiện đại như:
+                </p>
+                <ul>
+                    <li><strong>ResNet-50/100/152:</strong> Mạng học sâu với các kết nối tắt (skip connections) giúp giải quyết vấn đề tiêu biến gradient trong mạng sâu.</li>
+                    <li><strong>IR (Improved Residual):</strong> Phiên bản cải tiến của ResNet với các khối tích chập được tối ưu hóa.</li>
+                    <li><strong>IR-SE (Improved Residual with Squeeze-and-Excitation):</strong> Kết hợp khối IR với cơ chế Squeeze-and-Excitation để tăng cường khả năng học các đặc trưng quan trọng.</li>
+                    <li><strong>MobileNet/ShuffleNet:</strong> Các mạng nhẹ được thiết kế cho các thiết bị di động và có tài nguyên hạn chế.</li>
+                </ul>
+            </div>
+            <div class="col-md-5">
+                <div class="feature-item">
+                    <h5>Cấu trúc khối IR-SE</h5>
+                    <p>
+                        Khối IR-SE (Improved Residual with Squeeze-and-Excitation) là một cải tiến quan trọng trong kiến trúc backbone của ArcFace, bao gồm:
+                    </p>
+                    <ul>
+                        <li><strong>Khối Residual cải tiến:</strong> Thay đổi thứ tự của các lớp BN (Batch Normalization), ReLU và Conv so với ResNet gốc.</li>
+                        <li><strong>Cơ chế Squeeze-and-Excitation:</strong> Tính toán trọng số cho từng kênh đặc trưng dựa trên tầm quan trọng của chúng.</li>
+                        <li><strong>Kết nối tắt (Skip Connection):</strong> Cho phép gradient truyền trực tiếp qua mạng, giúp huấn luyện mạng sâu hiệu quả hơn.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <p>
-            Kiến trúc mạng của ArcFace thường bao gồm:
+            <strong>Kiến trúc đầy đủ của ArcFace thường bao gồm:</strong>
         </p>
 
         <ul>
-            <li><strong>Backbone Network:</strong> Thường sử dụng ResNet hoặc MobileNet để trích xuất đặc trưng từ ảnh đầu vào.</li>
-            <li><strong>Feature Layer:</strong> Một lớp fully-connected để chuyển đổi đặc trưng thành vector nhúng (embedding vector) có kích thước cố định (thường là 512 chiều).</li>
+            <li><strong>Lớp đầu vào:</strong> Nhận ảnh khuôn mặt đã được căn chỉnh (thường có kích thước 112x112 pixel).</li>
+            <li><strong>Backbone Network:</strong> Trích xuất các đặc trưng cấp cao từ ảnh đầu vào (thường sử dụng ResNet-50 IR-SE).</li>
+            <li><strong>Global Pooling:</strong> Giảm kích thước không gian của đặc trưng và tạo ra vector đặc trưng.</li>
+            <li><strong>Batch Normalization:</strong> Chuẩn hóa đặc trưng để tăng tốc độ hội tụ và ổn định quá trình huấn luyện.</li>
+            <li><strong>Dropout:</strong> Ngẫu nhiên tắt một số nơ-ron trong quá trình huấn luyện để tránh overfitting.</li>
+            <li><strong>Feature Layer:</strong> Lớp fully-connected để chuyển đổi đặc trưng thành vector nhúng (embedding vector) có kích thước cố định (thường là 512 chiều).</li>
             <li><strong>L2-Normalization:</strong> Chuẩn hóa vector nhúng để có độ dài bằng 1, giúp tính toán góc giữa các vector dễ dàng hơn.</li>
             <li><strong>Fully-connected Layer:</strong> Lớp cuối cùng để phân loại, với số nơ-ron bằng số lượng danh tính cần nhận diện.</li>
         </ul>
 
         <div class="report-note">
             <p>
-                Điểm đặc biệt của ArcFace không nằm ở kiến trúc mạng mà ở hàm mất mát (loss function) được sử dụng để huấn luyện mô hình.
+                Điểm đặc biệt của ArcFace không nằm ở kiến trúc mạng mà ở hàm mất mát (loss function) đặc biệt được sử dụng để huấn luyện mô hình, giúp tạo ra không gian đặc trưng có tính phân biệt cao.
             </p>
         </div>
 
@@ -551,10 +919,22 @@
             <li>$W_j$ là vector trọng số của lớp j</li>
             <li>$b_j$ là bias của lớp j</li>
             <li>$y_i$ là nhãn thực của mẫu thứ i</li>
+            <li>$N$ là số lượng mẫu huấn luyện</li>
+            <li>$n$ là số lượng lớp (danh tính)</li>
         </ul>
 
         <p>
-            Tuy nhiên, Softmax Loss không tối ưu hóa trực tiếp khoảng cách giữa các lớp, dẫn đến khả năng phân biệt không cao. ArcFace giải quyết vấn đề này bằng cách thêm một biên góc (angular margin) vào góc giữa vector đặc trưng và vector trọng số:
+            Tuy nhiên, Softmax Loss có một số hạn chế trong bài toán nhận diện khuôn mặt:
+        </p>
+
+        <ul>
+            <li><strong>Không tối ưu hóa trực tiếp khoảng cách giữa các lớp:</strong> Softmax chỉ tập trung vào việc phân loại chính xác, không đảm bảo rằng các đặc trưng của cùng một người sẽ gần nhau và đặc trưng của những người khác nhau sẽ xa nhau.</li>
+            <li><strong>Thiếu tính phân biệt:</strong> Các vector đặc trưng có thể không đủ phân biệt để xử lý các trường hợp khó như khuôn mặt có nhiều biểu cảm, góc nhìn khác nhau, hoặc điều kiện ánh sáng thay đổi.</li>
+            <li><strong>Không tối ưu cho bài toán xác minh:</strong> Softmax tối ưu hóa cho bài toán phân loại, không phải bài toán xác minh (verification) - so sánh hai khuôn mặt để xác định có phải cùng một người hay không.</li>
+        </ul>
+
+        <p>
+            ArcFace giải quyết những hạn chế này bằng cách chuyển đổi Softmax Loss thành một hàm mất mát dựa trên góc (angular-based loss) và thêm một biên góc (angular margin) vào góc giữa vector đặc trưng và vector trọng số:
         </p>
 
         <div class="report-formula">
@@ -570,18 +950,71 @@
             <li>$s$ là hệ số tỷ lệ (thường là 64)</li>
         </ul>
 
-        <div class="feature-item">
-            <h5>Ý nghĩa của Additive Angular Margin:</h5>
-            <p>
-                Bằng cách thêm biên góc $m$ vào góc $\theta_{y_i}$ (góc giữa vector đặc trưng và vector trọng số của lớp đúng), ArcFace buộc mô hình phải học cách tạo ra các vector đặc trưng có góc nhỏ hơn với vector trọng số của lớp đúng. Điều này dẫn đến:
-            </p>
-            <ul>
-                <li><strong>Intra-class compactness:</strong> Các vector đặc trưng của cùng một người sẽ gần nhau hơn trong không gian đặc trưng.</li>
-                <li><strong>Inter-class discrepancy:</strong> Các vector đặc trưng của những người khác nhau sẽ xa nhau hơn.</li>
-            </ul>
+        <div class="row">
+            <div class="col-md-7">
+                <div class="feature-item">
+                    <h5>Ý nghĩa của Additive Angular Margin:</h5>
+                    <p>
+                        Bằng cách thêm biên góc $m$ vào góc $\theta_{y_i}$ (góc giữa vector đặc trưng và vector trọng số của lớp đúng), ArcFace buộc mô hình phải học cách tạo ra các vector đặc trưng có góc nhỏ hơn với vector trọng số của lớp đúng. Điều này dẫn đến:
+                    </p>
+                    <ul>
+                        <li><strong>Intra-class compactness:</strong> Các vector đặc trưng của cùng một người sẽ gần nhau hơn trong không gian đặc trưng.</li>
+                        <li><strong>Inter-class discrepancy:</strong> Các vector đặc trưng của những người khác nhau sẽ xa nhau hơn.</li>
+                        <li><strong>Biên phân loại lớn hơn:</strong> Tạo ra biên phân loại lớn hơn giữa các lớp, giúp mô hình có khả năng tổng quát hóa tốt hơn.</li>
+                        <li><strong>Không gian đặc trưng có tính phân biệt cao:</strong> Các vector đặc trưng được phân bố trong không gian siêu cầu (hypersphere) với các cụm rõ ràng cho từng danh tính.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="feature-item">
+                    <h5>Ưu điểm của ArcFace so với các phương pháp khác:</h5>
+                    <ul>
+                        <li><strong>Ý nghĩa hình học rõ ràng:</strong> Biên góc cộng thêm có ý nghĩa hình học trực quan trong không gian đặc trưng.</li>
+                        <li><strong>Dễ tối ưu hóa:</strong> Hàm mất mát ổn định và dễ hội tụ trong quá trình huấn luyện.</li>
+                        <li><strong>Hiệu suất cao:</strong> Đạt kết quả tốt hơn so với các phương pháp trước đó như SphereFace, CosFace trên nhiều bộ dữ liệu chuẩn.</li>
+                        <li><strong>Khả năng mở rộng:</strong> Hoạt động tốt với số lượng lớp (danh tính) lớn, phù hợp cho các ứng dụng thực tế.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
+        <h4 class="subsection-title">1.3 Quy trình áp dụng ArcFace trong hệ thống nhận diện khuôn mặt</h4>
+
+        <p>
+            Trong hệ thống nhận diện khuôn mặt, chúng tôi sử dụng mô hình ArcFace đã huấn luyện sẵn với kiến trúc ResNet-50 IR-SE. Quy trình nhận diện được triển khai qua bốn bước chính như sau:
+        </p>
+
+        <ol>
+            <li><strong>Tiền xử lý dữ liệu:</strong>
+                <ul>
+                    <li>Phát hiện khuôn mặt trong ảnh (sử dụng RetinaFace)</li>
+                    <li>Căn chỉnh khuôn mặt dựa trên các điểm mốc (landmarks)</li>
+                    <li>Thay đổi kích thước ảnh khuôn mặt thành 112x112 pixel</li>
+                </ul>
+            </li>
+            <li><strong>Sử dụng mô hình ArcFace:</strong>
+                <ul>
+                    <li>Sử dụng mô hình ArcFace với backbone ResNet-50 IR-SE đã được huấn luyện trên tập dữ liệu lớn</li>
+                    <li>Tải các trọng số đã được tối ưu hóa với hàm mất mát Additive Angular Margin</li>
+                </ul>
+            </li>
+            <li><strong>Trích xuất đặc trưng:</strong>
+                <ul>
+                    <li>Sử dụng mô hình đã tải để trích xuất vector đặc trưng 512 chiều từ ảnh khuôn mặt</li>
+                    <li>Chuẩn hóa L2 vector đặc trưng để có độ dài bằng 1</li>
+                </ul>
+            </li>
+            <li><strong>So sánh khuôn mặt:</strong>
+                <ul>
+                    <li>Tính toán độ tương đồng cosine giữa các vector đặc trưng</li>
+                    <li>So sánh độ tương đồng với ngưỡng để xác định xem hai khuôn mặt có thuộc về cùng một người hay không</li>
+                </ul>
+            </li>
+        </ol>
+
         <h3 class="subsection-title">2. Đánh giá hiệu suất của ArcFace</h3>
+
+        <h4 class="subsection-title">2.1 Đánh giá hiệu suất của ArcFace và so sánh với các phương pháp khác</h4>
 
         <p>
             Để đánh giá hiệu suất của ArcFace trong nhận diện khuôn mặt, chúng tôi sử dụng các chỉ số đánh giá sau:
@@ -610,15 +1043,14 @@
                         <li><strong>FAR (False Acceptance Rate):</strong> Tỷ lệ chấp nhận sai - hệ thống nhận diện sai người lạ là người quen.</li>
                         <li><strong>FRR (False Rejection Rate):</strong> Tỷ lệ từ chối sai - hệ thống không nhận ra người quen.</li>
                         <li><strong>ERR (Equal Error Rate):</strong> Tỷ lệ lỗi khi FAR = FRR, là một chỉ số quan trọng để đánh giá tổng thể hiệu suất của hệ thống.</li>
+                        <li><strong>AUC (Area Under Curve):</strong> Diện tích dưới đường cong ROC, đo lường khả năng phân biệt tổng thể của mô hình.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <h4 class="subsection-title">2.1 So sánh hiệu suất giữa các mô hình nhúng đặc trưng</h4>
-
         <p>
-            Chúng tôi so sánh hiệu suất của ArcFace với hai mô hình nhúng đặc trưng phổ biến khác là FaceNet và EfficientNet:
+            Trong nghiên cứu này, chúng tôi so sánh hiệu suất của ArcFace với hai mô hình nhúng đặc trưng có kết quả thực nghiệm là FaceNet và EfficientNet. Các mô hình này được đánh giá dựa trên nhiều chỉ số khác nhau tại ngưỡng tối ưu của từng mô hình, bao gồm độ chính xác (Accuracy), điểm F1 (F1 Score), tỷ lệ chấp nhận sai (FAR), tỷ lệ từ chối sai (FRR), tỷ lệ lỗi bằng nhau (ERR), diện tích dưới đường cong ROC (AUC), và thời gian xử lý trung bình:
         </p>
 
         <div class="table-responsive">
@@ -626,45 +1058,91 @@
                 <thead>
                     <tr>
                         <th>Mô hình</th>
+                        <th>Ngưỡng tối ưu</th>
                         <th>Accuracy</th>
                         <th>F1 Score</th>
                         <th>FAR</th>
                         <th>FRR</th>
                         <th>ERR</th>
                         <th>AUC</th>
-                        <th>Thời gian xử lý (ms)</th>
+                        <th>Thời gian xử lý (ms/cặp)</th>
+                    </tr>
+                </thead>
+                <caption style="caption-side: top; text-align: center; font-style: italic; margin-bottom: 10px;">Bảng 2: Hiệu suất của các mô hình nhúng đặc trưng tại ngưỡng tối ưu</caption>
+                <tbody>
+                    <tr>
+                        <td>ArcFace</td>
+                        <td>0.2000</td>
+                        <td>1.0000</td>
+                        <td>1.0000</td>
+                        <td>0.0000</td>
+                        <td>0.0000</td>
+                        <td>0.0000</td>
+                        <td>1.0000</td>
+                        <td>1115.4</td>
+                    </tr>
+                    <tr>
+                        <td>FaceNet</td>
+                        <td>0.7000</td>
+                        <td>0.9207</td>
+                        <td>0.9207</td>
+                        <td>0.0794</td>
+                        <td>0.0793</td>
+                        <td>0.0794</td>
+                        <td>0.9650</td>
+                        <td>1574.7</td>
+                    </tr>
+                    <tr>
+                        <td>EfficientNet</td>
+                        <td>0.6500</td>
+                        <td>0.6998</td>
+                        <td>0.6998</td>
+                        <td>0.3002</td>
+                        <td>0.3003</td>
+                        <td>0.3002</td>
+                        <td>0.7650</td>
+                        <td>492.4</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>
+            Ngoài các chỉ số hiệu suất định lượng, chúng tôi cũng so sánh các đặc điểm kỹ thuật của ba mô hình này:
+        </p>
+
+        <div class="table-responsive">
+            <table class="table feature-table">
+                <thead>
+                    <tr>
+                        <th>Phương pháp</th>
+                        <th>Năm</th>
+                        <th>Hàm mất mát</th>
+                        <th>Ưu điểm</th>
+                        <th>Nhược điểm</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>ArcFace</td>
-                        <td>0.95</td>
-                        <td>0.94</td>
-                        <td>0.06</td>
-                        <td>0.05</td>
-                        <td>0.055</td>
-                        <td>0.98</td>
-                        <td>85</td>
+                        <td><strong>FaceNet</strong></td>
+                        <td>2015</td>
+                        <td>Triplet Loss</td>
+                        <td>Trực tiếp tối ưu hóa khoảng cách Euclidean, dễ hiểu về mặt trực quan</td>
+                        <td>Khó khăn trong việc chọn mẫu triplet, tốc độ hội tụ chậm, hiệu suất thấp hơn so với các phương pháp sau này</td>
                     </tr>
                     <tr>
-                        <td>FaceNet</td>
-                        <td>0.92</td>
-                        <td>0.91</td>
-                        <td>0.09</td>
-                        <td>0.08</td>
-                        <td>0.085</td>
-                        <td>0.96</td>
-                        <td>95</td>
+                        <td><strong>ArcFace</strong></td>
+                        <td>2019</td>
+                        <td>Additive Angular Margin Loss</td>
+                        <td>Ý nghĩa hình học rõ ràng, dễ tối ưu hóa, hiệu suất cao</td>
+                        <td>Yêu cầu tài nguyên tính toán lớn, cần nhiều dữ liệu huấn luyện</td>
                     </tr>
                     <tr>
-                        <td>EfficientNet</td>
-                        <td>0.90</td>
-                        <td>0.89</td>
-                        <td>0.12</td>
-                        <td>0.10</td>
-                        <td>0.11</td>
-                        <td>0.94</td>
-                        <td>65</td>
+                        <td><strong>EfficientNet</strong></td>
+                        <td>2019</td>
+                        <td>Softmax Loss (với backbone EfficientNet)</td>
+                        <td>Tốc độ xử lý nhanh, hiệu quả về tài nguyên tính toán</td>
+                        <td>Hiệu suất nhận diện thấp hơn, độ chính xác kém hơn so với các mô hình chuyên biệt</td>
                     </tr>
                 </tbody>
             </table>
@@ -677,13 +1155,13 @@
         </p>
 
         <ul>
-            <li><strong>ArcFace</strong> đạt hiệu suất cao nhất về độ chính xác (Accuracy = 0.95, F1 Score = 0.94) và có tỷ lệ lỗi thấp nhất (ERR = 0.055). Mô hình này cũng có diện tích dưới đường cong ROC (AUC) cao nhất (0.98), thể hiện khả năng phân biệt tốt giữa các cặp khuôn mặt cùng người và khác người.</li>
-            <li><strong>FaceNet</strong> có hiệu suất tốt thứ hai, nhưng thời gian xử lý lâu hơn so với cả ArcFace và EfficientNet.</li>
-            <li><strong>EfficientNet</strong> có thời gian xử lý nhanh nhất nhưng hiệu suất thấp nhất trong ba mô hình.</li>
+            <li><strong>ArcFace</strong> đạt hiệu suất hoàn hảo về độ chính xác (Accuracy = 1.0000, F1 Score = 1.0000) và không có lỗi (ERR = 0.0000) tại ngưỡng tối ưu 0.20. Mô hình này cũng có diện tích dưới đường cong ROC (AUC) hoàn hảo (1.0000), thể hiện khả năng phân biệt tuyệt đối giữa các cặp khuôn mặt cùng người và khác người. ArcFace không có trường hợp nào nhận diện sai (FAR = 0.0000, FRR = 0.0000). Thời gian xử lý trung bình là 1115.4ms/cặp.</li>
+            <li><strong>FaceNet</strong> có hiệu suất khá tốt (Accuracy = 0.9207, F1 Score = 0.9207) và có tỷ lệ lỗi thấp (ERR = 0.0794) tại ngưỡng tối ưu 0.70. Thời gian xử lý của FaceNet là lâu nhất trong ba mô hình (1574.7ms/cặp).</li>
+            <li><strong>EfficientNet</strong> có thời gian xử lý nhanh nhất (492.4ms/cặp) nhưng hiệu suất thấp nhất trong ba mô hình (Accuracy = 0.6998, ERR = 0.3002) tại ngưỡng tối ưu 0.65. EfficientNet có FAR và FRR khá cao (khoảng 0.3), cho thấy khả năng phân biệt kém hơn so với hai mô hình còn lại.</li>
         </ul>
 
         <p>
-            ArcFace vượt trội hơn so với các mô hình khác nhờ vào hàm mất mát Additive Angular Margin, giúp tạo ra không gian đặc trưng có tính phân biệt cao. Điều này đặc biệt quan trọng trong các ứng dụng yêu cầu độ chính xác cao như hệ thống an ninh, xác thực sinh trắc học, và kiểm soát truy cập.
+            ArcFace vượt trội hơn so với các mô hình khác nhờ vào hàm mất mát Additive Angular Margin, giúp tạo ra không gian đặc trưng có tính phân biệt cao. Kết quả thực nghiệm cho thấy ArcFace có khả năng phân biệt rất tốt giữa các cặp khuôn mặt cùng người và khác người, với độ chính xác gần như tuyệt đối. Điều này đặc biệt quan trọng trong các ứng dụng yêu cầu độ chính xác cao như hệ thống an ninh, xác thực sinh trắc học, và kiểm soát truy cập.
         </p>
     </section>
 
@@ -692,57 +1170,70 @@
         <h2 class="section-title">Kết luận</h2>
 
         <p>
-            Trong báo cáo này, chúng tôi đã trình bày chi tiết về hai thành phần quan trọng của hệ thống nhận diện khuôn mặt: phát hiện khuôn mặt với RetinaFace và nhận dạng khuôn mặt với ArcFace.
+            Trong báo cáo này, chúng tôi đã trình bày chi tiết về hệ thống nhận diện khách hàng trong chatbot bán hàng, tập trung vào hai thành phần quan trọng: phát hiện khuôn mặt với RetinaFace và nhận dạng khuôn mặt với ArcFace. Hệ thống này giúp chatbot bán hàng có khả năng nhận diện khách hàng quen thuộc, từ đó cung cấp trải nghiệm mua sắm được cá nhân hóa và nâng cao hiệu quả bán hàng.
         </p>
 
-        <h3 class="subsection-title">Tổng kết về phát hiện khuôn mặt</h3>
+        <h3 class="subsection-title">Tổng kết về phát hiện khuôn mặt khách hàng</h3>
 
         <p>
-            RetinaFace là một mô hình phát hiện khuôn mặt tiên tiến với kiến trúc đa nhiệm vụ, có khả năng không chỉ xác định vị trí khuôn mặt mà còn dự đoán các điểm mốc khuôn mặt và thông tin 3D. So với các mô hình khác như MTCNN, Haar Cascade và YOLO, RetinaFace đạt được độ chính xác cao nhất (IoU = 0.89) nhưng cũng đòi hỏi thời gian xử lý lâu hơn.
+            Kết quả thực nghiệm cho thấy RetinaFace là mô hình phát hiện khuôn mặt hiệu quả nhất cho hệ thống chatbot bán hàng, với độ chính xác cao nhất (IoU = 0.8483) và khoảng cách tâm thấp nhất (20.58px) trong các mô hình được đánh giá. Mặc dù thời gian xử lý của RetinaFace (425.5ms) không phải là nhanh nhất, nhưng độ chính xác cao và tỷ lệ lỗi thấp (chỉ 0.3%) làm cho nó trở thành lựa chọn tối ưu cho việc nhận diện khách hàng, nơi độ chính xác là yếu tố quan trọng hàng đầu.
         </p>
 
         <p>
-            Việc lựa chọn mô hình phát hiện khuôn mặt phù hợp phụ thuộc vào yêu cầu cụ thể của ứng dụng:
+            Trong môi trường bán lẻ trực tuyến, việc phát hiện chính xác khuôn mặt khách hàng là bước đầu tiên và quan trọng để hệ thống chatbot có thể:
         </p>
 
         <ul>
-            <li>Nếu ưu tiên độ chính xác cao, RetinaFace là lựa chọn tốt nhất.</li>
-            <li>Nếu cần cân bằng giữa độ chính xác và tốc độ, MTCNN là một lựa chọn hợp lý.</li>
-            <li>Nếu ưu tiên tốc độ xử lý trong thời gian thực, YOLO hoặc Haar Cascade có thể là lựa chọn phù hợp hơn.</li>
+            <li>Xác định chính xác vị trí khuôn mặt khách hàng trong khung hình webcam, ngay cả trong điều kiện ánh sáng không lý tưởng</li>
+            <li>Cung cấp dữ liệu đầu vào chất lượng cao cho bước nhận dạng khuôn mặt tiếp theo</li>
+            <li>Đảm bảo trải nghiệm người dùng mượt mà với tỷ lệ lỗi thấp</li>
         </ul>
 
-        <h3 class="subsection-title">Tổng kết về nhận dạng khuôn mặt</h3>
+        <h3 class="subsection-title">Tổng kết về nhận dạng khuôn mặt khách hàng</h3>
 
         <p>
-            ArcFace là một phương pháp nhận dạng khuôn mặt hiệu quả với hàm mất mát Additive Angular Margin đặc biệt, giúp tạo ra không gian đặc trưng có tính phân biệt cao. So với các mô hình khác như FaceNet và EfficientNet, ArcFace đạt được hiệu suất cao nhất về độ chính xác (Accuracy = 0.95) và có tỷ lệ lỗi thấp nhất (ERR = 0.055).
+            Trong nghiên cứu này, chúng tôi đã áp dụng mô hình ArcFace đã được huấn luyện sẵn để nhận dạng khách hàng. Kết quả thực nghiệm cho thấy ArcFace vượt trội so với các mô hình khác như FaceNet và EfficientNet, với độ chính xác hoàn hảo (Accuracy = 1.0000) và không có lỗi (ERR = 0.0000) tại ngưỡng tối ưu 0.20. Điều này đặc biệt quan trọng trong hệ thống chatbot bán hàng, nơi việc nhận diện sai khách hàng có thể dẫn đến trải nghiệm người dùng kém và giảm hiệu quả bán hàng.
         </p>
 
         <p>
-            Việc kết hợp RetinaFace cho phát hiện khuôn mặt và ArcFace cho nhận dạng khuôn mặt tạo nên một hệ thống nhận diện khuôn mặt mạnh mẽ và chính xác, phù hợp cho nhiều ứng dụng thực tế như:
+            Với thời gian xử lý trung bình 1115.4ms/cặp, ArcFace cung cấp khả năng nhận diện khách hàng trong thời gian thực, cho phép chatbot bán hàng:
         </p>
 
         <ul>
-            <li>Hệ thống an ninh và giám sát</li>
-            <li>Kiểm soát truy cập và xác thực sinh trắc học</li>
-            <li>Tìm kiếm và nhận dạng người trong cơ sở dữ liệu lớn</li>
-            <li>Ứng dụng tương tác người-máy thông minh</li>
+            <li>Nhận diện chính xác khách hàng quen thuộc khi họ truy cập hệ thống</li>
+            <li>Truy xuất lịch sử mua hàng và sở thích cá nhân của khách hàng</li>
+            <li>Cung cấp đề xuất sản phẩm được cá nhân hóa dựa trên hành vi mua sắm trước đây</li>
+            <li>Tạo trải nghiệm mua sắm liền mạch và cá nhân hóa, tăng cường sự hài lòng của khách hàng</li>
+        </ul>
+
+        <h3 class="subsection-title">Lợi ích của hệ thống nhận diện khách hàng trong chatbot bán hàng</h3>
+
+        <p>
+            Việc tích hợp hệ thống nhận diện khách hàng dựa trên RetinaFace và ArcFace vào chatbot bán hàng mang lại nhiều lợi ích đáng kể:
+        </p>
+
+        <ul>
+            <li><strong>Cá nhân hóa trải nghiệm mua sắm:</strong> Hệ thống có thể chào đón khách hàng bằng tên, đề xuất sản phẩm phù hợp với sở thích cá nhân, và cung cấp thông tin về các mặt hàng liên quan đến lịch sử mua sắm.</li>
+            <li><strong>Tăng hiệu quả bán hàng:</strong> Với khả năng nhận diện chính xác khách hàng (Accuracy = 1.0000), chatbot có thể cung cấp đề xuất sản phẩm có tỷ lệ chuyển đổi cao hơn, tăng doanh số bán hàng.</li>
+            <li><strong>Cải thiện dịch vụ khách hàng:</strong> Chatbot có thể truy cập ngay lập tức thông tin về các giao dịch trước đây, giúp giải quyết vấn đề và hỗ trợ khách hàng hiệu quả hơn.</li>
+            <li><strong>Thu thập dữ liệu hành vi khách hàng:</strong> Hệ thống có thể ghi lại và phân tích hành vi của khách hàng trong suốt quá trình tương tác, cung cấp thông tin quý giá cho việc cải thiện sản phẩm và chiến lược tiếp thị.</li>
         </ul>
 
         <h3 class="subsection-title">Hướng phát triển trong tương lai</h3>
 
         <p>
-            Mặc dù đã đạt được những tiến bộ đáng kể, lĩnh vực nhận diện khuôn mặt vẫn còn nhiều thách thức và hướng phát triển trong tương lai:
+            Dựa trên kết quả nghiên cứu, chúng tôi đề xuất một số hướng phát triển trong tương lai để cải thiện hệ thống nhận diện khách hàng trong chatbot bán hàng:
         </p>
 
         <ul>
-            <li><strong>Cải thiện khả năng chống giả mạo:</strong> Phát triển các phương pháp phát hiện khuôn mặt giả (anti-spoofing) để tăng cường an ninh cho hệ thống nhận diện khuôn mặt.</li>
-            <li><strong>Nhận diện trong điều kiện khó khăn:</strong> Cải thiện hiệu suất nhận diện trong điều kiện ánh sáng kém, góc nghiêng lớn, hoặc khuôn mặt bị che khuất một phần.</li>
-            <li><strong>Giảm thiểu sự thiên vị:</strong> Phát triển các mô hình công bằng hơn, giảm thiểu sự thiên vị đối với các nhóm dân số khác nhau.</li>
-            <li><strong>Bảo vệ quyền riêng tư:</strong> Nghiên cứu các phương pháp nhận diện khuôn mặt bảo vệ quyền riêng tư, như học liên hợp (federated learning) hoặc mã hóa đồng hình (homomorphic encryption).</li>
+            <li><strong>Tối ưu hóa thời gian xử lý:</strong> Mặc dù ArcFace có độ chính xác hoàn hảo, thời gian xử lý 1115.4ms/cặp vẫn có thể được cải thiện để tạo trải nghiệm mượt mà hơn cho khách hàng.</li>
+            <li><strong>Tích hợp phân tích cảm xúc:</strong> Mở rộng hệ thống để nhận diện không chỉ danh tính mà còn cả cảm xúc của khách hàng, giúp chatbot điều chỉnh phản hồi phù hợp với trạng thái cảm xúc của khách hàng.</li>
+            <li><strong>Phát triển khả năng học liên tục:</strong> Xây dựng cơ chế cho phép hệ thống cập nhật và cải thiện mô hình nhận diện dựa trên dữ liệu mới thu thập được từ tương tác với khách hàng.</li>
+            <li><strong>Tăng cường bảo mật và quyền riêng tư:</strong> Phát triển các phương pháp bảo vệ dữ liệu sinh trắc học của khách hàng, đảm bảo tuân thủ các quy định về quyền riêng tư và bảo vệ dữ liệu.</li>
         </ul>
 
         <p>
-            Với sự phát triển không ngừng của các kỹ thuật học sâu và tăng cường dữ liệu, chúng ta có thể kỳ vọng vào những tiến bộ đáng kể trong lĩnh vực nhận diện khuôn mặt trong tương lai, mở ra nhiều ứng dụng mới và cải thiện các ứng dụng hiện có.
+            Với những tiến bộ không ngừng trong lĩnh vực học máy và thị giác máy tính, hệ thống nhận diện khách hàng trong chatbot bán hàng sẽ ngày càng trở nên chính xác, hiệu quả và an toàn hơn, mang lại trải nghiệm mua sắm trực tuyến được cá nhân hóa cao và tăng cường hiệu quả kinh doanh cho các doanh nghiệp thương mại điện tử.
         </p>
     </section>
 

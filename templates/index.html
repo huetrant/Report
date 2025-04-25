@@ -6,9 +6,9 @@
 <div class="container mt-4">
     <div class="jumbotron bg-light p-4 rounded">
         <h1 class="display-4">Tổng quan</h1>
-        <p class="lead">Hệ thống nhận diện khuôn mặt được phát triển nhằm mục đích đánh giá và so sánh hiệu suất của các mô hình khác nhau trong lĩnh vực phát hiện và nhận diện khuôn mặt.</p>
+        <p class="lead">Hệ thống nhận diện khách hàng trong chatbot bán hàng được phát triển nhằm cá nhân hóa trải nghiệm mua sắm và nâng cao hiệu quả bán hàng thông qua công nghệ nhận diện khuôn mặt.</p>
         <hr class="my-4">
-        <p>Báo cáo này cung cấp tổng quan về các mô hình được sử dụng và kết quả đánh giá của chúng.</p>
+        <p>Hệ thống bao gồm hai thành phần chính: phát hiện khuôn mặt (RetinaFace) và nhận dạng khuôn mặt (ArcFace), giúp chatbot bán hàng có khả năng nhận diện khách hàng quen thuộc, truy xuất lịch sử mua hàng và cung cấp đề xuất sản phẩm được cá nhân hóa.</p>
     </div>
 
     <div class="row mb-4 mt-4">
@@ -68,29 +68,34 @@
                                     <tr>
                                         <th>Mô hình</th>
                                         <th>IoU trung bình</th>
+                                        <th>Khoảng cách tâm (px)</th>
                                         <th>Thời gian xử lý (ms)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>MTCNN</td>
-                                        <td>0.82</td>
-                                        <td>120</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Haar Cascade</td>
-                                        <td>0.75</td>
-                                        <td>45</td>
-                                    </tr>
-                                    <tr>
                                         <td>RetinaFace</td>
-                                        <td>0.89</td>
-                                        <td>180</td>
+                                        <td>0.8483</td>
+                                        <td>20.58</td>
+                                        <td>425.5</td>
+                                    </tr>
+                                    <tr>
+                                        <td>MTCNN</td>
+                                        <td>0.8203</td>
+                                        <td>23.48</td>
+                                        <td>795.8</td>
                                     </tr>
                                     <tr>
                                         <td>YOLO</td>
-                                        <td>0.85</td>
-                                        <td>90</td>
+                                        <td>0.6637</td>
+                                        <td>41.66</td>
+                                        <td>183.3</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Haar Cascade</td>
+                                        <td>0.6629</td>
+                                        <td>38.01</td>
+                                        <td>460.0</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -101,25 +106,37 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>Mô hình</th>
-                                        <th>Accuracy</th>
-                                        <th>F1 Score</th>
+                                        <th>Ngưỡng tối ưu</th>
+                                        <th>Độ chính xác</th>
+                                        <th>ERR</th>
+                                        <th>AUC</th>
+                                        <th>Thời gian xử lý (ms/cặp)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td>ArcFace</td>
-                                        <td>0.95</td>
-                                        <td>0.94</td>
+                                        <td>0.2000</td>
+                                        <td>1.0000</td>
+                                        <td>0.0000</td>
+                                        <td>1.0000</td>
+                                        <td>1115.4</td>
                                     </tr>
                                     <tr>
                                         <td>FaceNet</td>
-                                        <td>0.92</td>
-                                        <td>0.91</td>
+                                        <td>0.7000</td>
+                                        <td>0.9207</td>
+                                        <td>0.0794</td>
+                                        <td>0.9650</td>
+                                        <td>1574.7</td>
                                     </tr>
                                     <tr>
                                         <td>EfficientNet</td>
-                                        <td>0.90</td>
-                                        <td>0.89</td>
+                                        <td>0.6500</td>
+                                        <td>0.6998</td>
+                                        <td>0.3002</td>
+                                        <td>0.7650</td>
+                                        <td>492.4</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -161,6 +178,34 @@
                         <li>Trong mỗi trang, bạn có thể chọn mô hình cụ thể để xem kết quả chi tiết</li>
                         <li>Phân tích các biểu đồ và bảng thống kê để đánh giá hiệu suất</li>
                     </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Lợi ích của hệ thống nhận diện khách hàng trong chatbot bán hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i>Cá nhân hóa trải nghiệm mua sắm với độ chính xác cao (ArcFace: Accuracy = 1.0000)</li>
+                                <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i>Nhận diện chính xác khách hàng quen thuộc và truy xuất lịch sử mua hàng</li>
+                                <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i>Cung cấp đề xuất sản phẩm được cá nhân hóa dựa trên sở thích của khách hàng</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i>Tăng hiệu quả bán hàng và cải thiện dịch vụ khách hàng</li>
+                                <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i>Thu thập và phân tích dữ liệu hành vi khách hàng để cải thiện chiến lược tiếp thị</li>
+                                <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i>Tạo trải nghiệm mua sắm liền mạch và tăng cường sự hài lòng của khách hàng</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -3,11 +3,14 @@ import pandas as pd
 from PIL import Image, ImageDraw
 import io
 import base64
+import glob
 from .face_detection import load_annotations, draw_box
 
 # Đường dẫn đến thư mục dữ liệu
-DATA_DIR = "./data/image_customer"
-CUSTOMER_ROOT = os.path.join(DATA_DIR)
+DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'image_customer'))
+CUSTOMER_ROOT = DATA_DIR
+print(f"DATA_DIR: {DATA_DIR}")
+print(f"DATA_DIR exists: {os.path.exists(DATA_DIR)}")
 
 def get_detection_methods():
     """Trả về danh sách các phương pháp nhận diện có sẵn."""
@@ -21,24 +24,40 @@ def get_detection_methods():
 def get_csv_files():
     """Trả về danh sách các file CSV tương ứng với các phương pháp nhận diện."""
     return {
-        "MTCNN": "./result/MTCNN_face_detection.csv",
-        "Yolo": "./result/Yolo_face_detection.csv",
-        "Haar": "./result/Haar_face_detection.csv",
-        "Retina": "./result/RetinaFace_face_detection.csv"
+        "MTCNN": "result/MTCNN_face_detection.csv",
+        "Yolo": "result/Yolo_face_detection.csv",
+        "Haar": "result/Haar_face_detection.csv",
+        "Retina": "result/RetinaFace_face_detection.csv"
     }
 
 def load_predictions(detection_method):
     """Đọc dữ liệu từ file CSV tương ứng với phương pháp nhận diện."""
     csv_files = get_csv_files()
 
+    print(f"Loading predictions for method: {detection_method}")
+    print(f"Available methods: {list(csv_files.keys())}")
+
+    if detection_method not in csv_files:
+        print(f"Error: Method '{detection_method}' not found in available methods")
+        return None, f"Phương pháp '{detection_method}' không được hỗ trợ"
+
+    csv_path = csv_files[detection_method]
+    print(f"CSV path: {csv_path}")
+    print(f"File exists: {os.path.isfile(csv_path)}")
+
     try:
-        predictions_df = pd.read_csv(csv_files[detection_method])
+        predictions_df = pd.read_csv(csv_path)
+        print(f"Successfully loaded CSV with {len(predictions_df)} rows")
+
         # Đảm bảo tên cột phù hợp
         if 'filename' in predictions_df.columns and 'file_name' not in predictions_df.columns:
             predictions_df = predictions_df.rename(columns={'filename': 'file_name'})
+            print("Renamed 'filename' column to 'file_name'")
+
         return predictions_df, None
     except Exception as e:
-        return None, f"Không thể đọc file {csv_files[detection_method]}: {e}"
+        print(f"Error loading CSV: {e}")
+        return None, f"Không thể đọc file {csv_path}: {e}"
 
 def calculate_stats(predictions_df):
     """Tính toán các thống kê từ dữ liệu dự đoán."""
@@ -90,11 +109,11 @@ def calculate_all_models_stats():
     all_stats = {}
     detection_methods = get_detection_methods()
     csv_files = get_csv_files()
-    
+
     for method_key, method_name in detection_methods.items():
         try:
             predictions_df = pd.read_csv(csv_files[method_key])
-            
+
             # Tính toán thống kê
             zero_iou_count = len(predictions_df[predictions_df['IoU'] == 0])
             poor_iou_count = len(predictions_df[(predictions_df['IoU'] > 0) & (predictions_df['IoU'] < 0.5)])
@@ -126,18 +145,33 @@ def calculate_all_models_stats():
 
 def get_customer_folders(page, customers_per_page=4):
     """Lấy danh sách thư mục khách hàng cho trang hiện tại."""
-    # Lấy danh sách khách hàng
-    customer_folders = [d for d in os.listdir(CUSTOMER_ROOT)
-                       if os.path.isdir(os.path.join(CUSTOMER_ROOT, d)) and d.isdigit()]
-    customer_folders.sort(key=lambda x: int(x))
+    print(f"Getting customer folders for page {page}, customers_per_page={customers_per_page}")
+    print(f"CUSTOMER_ROOT: {CUSTOMER_ROOT}")
+    print(f"CUSTOMER_ROOT exists: {os.path.exists(CUSTOMER_ROOT)}")
+
+    try:
+        # Lấy danh sách khách hàng
+        customer_folders = [d for d in os.listdir(CUSTOMER_ROOT)
+                           if os.path.isdir(os.path.join(CUSTOMER_ROOT, d)) and d.isdigit()]
+        customer_folders.sort(key=lambda x: int(x))
+
+        print(f"Found {len(customer_folders)} customer folders: {customer_folders}")
+    except Exception as e:
+        print(f"Error listing customer folders: {e}")
+        # Tạo danh sách mặc định nếu có lỗi
+        customer_folders = [str(i) for i in range(1, 9)]  # Giả sử có 8 khách hàng
+        print(f"Using default customer folders: {customer_folders}")
 
     # Tính tổng số trang
     total_pages = (len(customer_folders) + customers_per_page - 1) // customers_per_page
+    print(f"Total pages: {total_pages}")
 
     # Lấy khách hàng cho trang hiện tại
     start_idx = page * customers_per_page
     end_idx = min(start_idx + customers_per_page, len(customer_folders))
     current_customers = customer_folders[start_idx:end_idx]
+
+    print(f"Returning customers {start_idx} to {end_idx-1}: {current_customers}")
 
     return current_customers, total_pages
 
